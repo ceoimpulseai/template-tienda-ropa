@@ -1,5 +1,14 @@
 // Único archivo pensado para editar al adaptar el template a un rubro nuevo.
 // No debería hacer falta tocar lógica de módulos para cambiar de rubro — solo esto.
+export interface NavEntry {
+  to: string;
+  label: string;
+  // Presente sólo para los módulos de ejemplo: gatea la entrada de nav (y su ruta
+  // en App.tsx) contra el flag correspondiente en enabledModules. Ausente = siempre
+  // visible (módulos genéricos: customers, team, business, branches).
+  moduleKey?: keyof BusinessConfig['enabledModules'];
+}
+
 export interface BusinessConfig {
   appName: string;
   terminology: {
@@ -13,26 +22,46 @@ export interface BusinessConfig {
     sales: boolean;
     costs: boolean;
     metrics: boolean;
+    catalog: boolean;
   };
+  nav: NavEntry[];
   branding: {
     primaryColor: string; // aplicado a --color-primary en ambos temas por ThemeContext
   };
 }
 
+const terminology = {
+  item: 'Producto',
+  itemPlural: 'Productos',
+  branch: 'Sucursal',
+  branchPlural: 'Sucursales',
+};
+
+const enabledModules = {
+  purchases: true,
+  sales: true,
+  costs: true,
+  metrics: true,
+  catalog: true,
+};
+
+const nav: NavEntry[] = [
+  { to: '/', label: 'Métricas', moduleKey: 'metrics' },
+  { to: '/items', label: terminology.itemPlural },
+  { to: '/purchases', label: 'Compras', moduleKey: 'purchases' },
+  { to: '/sales', label: 'Ventas', moduleKey: 'sales' },
+  { to: '/costs', label: 'Gastos', moduleKey: 'costs' },
+  { to: '/customers', label: 'Clientes' },
+  { to: '/team', label: 'Equipo' },
+  { to: '/business', label: 'Negocio' },
+  { to: '/branches', label: terminology.branchPlural },
+];
+
 export const businessConfig: BusinessConfig = {
   appName: 'Business Admin Template',
-  terminology: {
-    item: 'Producto',
-    itemPlural: 'Productos',
-    branch: 'Sucursal',
-    branchPlural: 'Sucursales',
-  },
-  enabledModules: {
-    purchases: true,
-    sales: true,
-    costs: true,
-    metrics: true,
-  },
+  terminology,
+  enabledModules,
+  nav,
   branding: {
     primaryColor: '#2563eb',
   },

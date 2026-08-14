@@ -2,6 +2,12 @@
 @import './theme/tokens.css';
 
 @theme {
+  --spacing: var(--spacing);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+
   --color-bg: var(--color-bg);
   --color-bg-subtle: var(--color-bg-subtle);
   --color-surface: var(--color-surface);
