@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
+import { Link } from 'react-router-dom';
 import { Card } from '../../ui/Card';
 import { Button } from '../../ui/Button';
 import { Input } from '../../ui/Input';
@@ -61,6 +62,9 @@ export function RegisterPage() {
             Crear cuenta
           </Button>
         </form>
+        <Link to="/login" className="mt-4 block text-center text-sm text-text-muted hover:text-text">
+          ¿Ya tenés cuenta? Iniciá sesión
+        </Link>
       </Card>
     </div>
   );

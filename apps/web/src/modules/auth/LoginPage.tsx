@@ -49,6 +49,9 @@ export function LoginPage() {
         <Link to="/forgot-password" className="mt-4 block text-center text-sm text-text-muted hover:text-text">
           ¿Olvidaste tu contraseña?
         </Link>
+        <Link to="/register" className="mt-2 block text-center text-sm text-text-muted hover:text-text">
+          ¿No tenés cuenta? Registrate
+        </Link>
       </Card>
     </div>
   );
