@@ -1,6 +1,7 @@
 import { Business } from '../modules/business/business.model.js';
 import { Branch } from '../modules/branches/branch.model.js';
 import { BusinessMember } from '../modules/team/team.model.js';
+import { Customer } from '../modules/customers/customer.model.js';
 import { Item } from '../modules/purchases/item.model.js';
 import { Purchase } from '../modules/purchases/purchase.model.js';
 import { Sale } from '../modules/sales/sale.model.js';
@@ -19,10 +20,14 @@ Business.hasMany(Purchase, { foreignKey: 'businessId' });
 Item.hasMany(Purchase, { foreignKey: 'itemId' });
 Branch.hasMany(Purchase, { foreignKey: 'branchId' });
 
+Business.hasMany(Customer, { foreignKey: 'businessId' });
+Customer.belongsTo(Business, { foreignKey: 'businessId' });
+
 Business.hasMany(Sale, { foreignKey: 'businessId' });
 Item.hasMany(Sale, { foreignKey: 'itemId' });
 Branch.hasMany(Sale, { foreignKey: 'branchId' });
+Customer.hasMany(Sale, { foreignKey: 'customerId' });
 
 Business.hasMany(Cost, { foreignKey: 'businessId' });
 
-export { Business, Branch, BusinessMember, Item, Purchase, Sale, Cost };
+export { Business, Branch, BusinessMember, Customer, Item, Purchase, Sale, Cost };

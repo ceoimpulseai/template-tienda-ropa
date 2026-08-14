@@ -11,12 +11,16 @@ import type { Sale } from '@template/shared';
 
 export function SalesPage() {
   const { data, loading, refetch } = useApi<Sale[]>('/sales');
-  const [form, setForm] = useState({ itemId: '', quantity: 1, unitPrice: 0 });
+  const [form, setForm] = useState({ itemId: '', customerId: '', quantity: 1, unitPrice: 0 });
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    await apiFetch('/sales', { method: 'POST', body: JSON.stringify(form) });
-    setForm({ itemId: '', quantity: 1, unitPrice: 0 });
+    const { customerId, ...rest } = form;
+    await apiFetch('/sales', {
+      method: 'POST',
+      body: JSON.stringify(customerId ? { ...rest, customerId } : rest),
+    });
+    setForm({ itemId: '', customerId: '', quantity: 1, unitPrice: 0 });
     refetch();
   }
 
@@ -44,6 +48,11 @@ export function SalesPage() {
           value={form.unitPrice}
           onChange={(e) => setForm({ ...form, unitPrice: Number(e.target.value) })}
           required
+        />
+        <Input
+          placeholder="ID de cliente (opcional)"
+          value={form.customerId}
+          onChange={(e) => setForm({ ...form, customerId: e.target.value })}
         />
         <Button type="submit">Registrar venta</Button>
       </form>

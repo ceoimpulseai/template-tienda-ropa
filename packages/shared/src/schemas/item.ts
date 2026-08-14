@@ -36,12 +36,15 @@ export const saleSchema = z.object({
   businessId: z.string(),
   branchId: z.string(),
   itemId: z.string(),
+  customerId: z.string().nullable(),
   quantity: z.number().positive(),
   unitPrice: z.number().nonnegative(),
 });
 export type Sale = z.infer<typeof saleSchema>;
 
-export const createSaleSchema = saleSchema.pick({ itemId: true, quantity: true, unitPrice: true });
+export const createSaleSchema = saleSchema
+  .pick({ itemId: true, quantity: true, unitPrice: true })
+  .extend({ customerId: z.string().optional() });
 export type CreateSaleInput = z.infer<typeof createSaleSchema>;
 
 export const costTypeSchema = z.enum(['fixed', 'variable']);

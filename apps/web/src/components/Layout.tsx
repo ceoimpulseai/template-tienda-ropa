@@ -9,6 +9,7 @@ const links = [
   { to: '/purchases', label: 'Compras', enabled: businessConfig.enabledModules.purchases },
   { to: '/sales', label: 'Ventas', enabled: businessConfig.enabledModules.sales },
   { to: '/costs', label: 'Gastos', enabled: businessConfig.enabledModules.costs },
+  { to: '/customers', label: 'Clientes', enabled: true },
   { to: '/team', label: 'Equipo', enabled: true },
   { to: '/business', label: 'Negocio', enabled: true },
   { to: '/branches', label: businessConfig.terminology.branchPlural, enabled: true },

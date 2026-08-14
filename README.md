@@ -55,7 +55,7 @@ packages/shared/               # tipos y schemas Zod compartidos
 ```
 
 Módulos genéricos (no deberían necesitar cambios entre rubros): `auth`, `team`,
-`business`, `branches`.
+`business`, `branches`, `customers`.
 
 Módulos de ejemplo (marcados con `// EJEMPLO` en cada archivo): `purchases`, `sales`,
 `costs`, `metrics`. Usan una entidad genérica `Item` — son el punto de partida a

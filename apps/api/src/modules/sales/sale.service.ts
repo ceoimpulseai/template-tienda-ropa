@@ -22,6 +22,7 @@ export const saleService = {
           businessId,
           branchId,
           itemId: input.itemId,
+          customerId: input.customerId ?? null,
           quantity: input.quantity,
           unitPrice: input.unitPrice,
         },

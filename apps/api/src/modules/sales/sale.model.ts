@@ -13,6 +13,7 @@ export class Sale extends Model<InferAttributes<Sale>, InferCreationAttributes<S
   declare businessId: string;
   declare branchId: string;
   declare itemId: string;
+  declare customerId: CreationOptional<string | null>;
   declare quantity: number;
   declare unitPrice: number;
 }
@@ -23,6 +24,7 @@ Sale.init(
     businessId: { type: DataTypes.UUID, allowNull: false },
     branchId: { type: DataTypes.UUID, allowNull: false },
     itemId: { type: DataTypes.UUID, allowNull: false },
+    customerId: { type: DataTypes.UUID, allowNull: true },
     quantity: { type: DataTypes.FLOAT, allowNull: false },
     unitPrice: { type: DataTypes.FLOAT, allowNull: false },
   },
