@@ -18,6 +18,14 @@ const envSchema = z.object({
   SMTP_USER: z.string().optional(),
   SMTP_PASSWORD: z.string().optional(),
   SMTP_FROM: z.string().default('no-reply@template.local'),
+}).superRefine((data, ctx) => {
+  if (data.NODE_ENV === 'production' && data.BETTER_AUTH_SECRET === 'dev-secret-change-me') {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['BETTER_AUTH_SECRET'],
+      message: 'BETTER_AUTH_SECRET must be set to a real secret in production (refusing to boot with the dev default).',
+    });
+  }
 });
 
 export const env = envSchema.parse(process.env);
