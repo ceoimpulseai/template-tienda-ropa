@@ -15,7 +15,7 @@ export interface BusinessConfig {
     metrics: boolean;
   };
   branding: {
-    primaryColor: string; // debe coincidir con --color-primary en theme/tokens.css
+    primaryColor: string; // aplicado a --color-primary en ambos temas por ThemeContext
   };
 }
 

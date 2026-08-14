@@ -1,14 +1,11 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Card } from '../../ui/Card';
 import { Button } from '../../ui/Button';
 import { Input } from '../../ui/Input';
 import { apiFetch } from '../../lib/apiFetch';
-import { authClient } from '../../lib/auth-client';
 
 export function RegisterPage() {
-  const navigate = useNavigate();
   const [form, setForm] = useState({ name: '', email: '', password: '', businessName: '' });
   const [error, setError] = useState<string | null>(null);
 
@@ -16,9 +13,12 @@ export function RegisterPage() {
     event.preventDefault();
     setError(null);
     try {
+      // /auth/register ya deja al usuario autenticado (reenvía el Set-Cookie de sesión).
+      // Recarga completa en vez de navigate(): el store reactivo de better-auth tarda un
+      // tick en reflejar la sesión nueva y un navigate() inmediato gana la carrera y
+      // rebota a /login aunque la sesión ya esté creada.
       await apiFetch('/auth/register', { method: 'POST', body: JSON.stringify(form) });
-      await authClient.signIn.email({ email: form.email, password: form.password });
-      navigate('/');
+      window.location.href = '/';
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo registrar');
     }

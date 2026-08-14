@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { businessConfig } from '../config/business.config';
 
 type Theme = 'light' | 'dark';
 
@@ -22,6 +23,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.style.setProperty('--color-primary', businessConfig.branding.primaryColor);
     localStorage.setItem(STORAGE_KEY, theme);
   }, [theme]);
 
