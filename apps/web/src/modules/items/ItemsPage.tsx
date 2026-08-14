@@ -37,6 +37,7 @@ export function ItemsPage() {
 
       <form onSubmit={handleSubmit} className="mb-4 flex flex-wrap gap-2">
         <Input
+          label="Nombre"
           placeholder="Nombre"
           value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -44,6 +45,7 @@ export function ItemsPage() {
         />
         <Input
           type="number"
+          label="Precio"
           placeholder="Precio"
           value={form.price}
           onChange={(e) => setForm({ ...form, price: e.target.value })}
@@ -51,6 +53,7 @@ export function ItemsPage() {
         />
         <Input
           type="number"
+          label="Stock"
           placeholder="Stock"
           value={form.stock}
           onChange={(e) => setForm({ ...form, stock: e.target.value })}
@@ -72,6 +75,7 @@ export function ItemsPage() {
               render: (i) => (
                 <input
                   type="checkbox"
+                  aria-label={`Visible en catálogo público: ${i.name}`}
                   checked={i.visibleInCatalog}
                   onChange={() => handleToggleVisible(i)}
                 />
