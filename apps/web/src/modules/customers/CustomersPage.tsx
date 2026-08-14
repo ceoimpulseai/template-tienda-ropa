@@ -30,6 +30,7 @@ export function CustomersPage() {
 
       <form onSubmit={handleSubmit} className="mb-4 flex flex-wrap gap-2">
         <Input
+          label="Nombre"
           placeholder="Nombre"
           value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -37,11 +38,13 @@ export function CustomersPage() {
         />
         <Input
           type="email"
+          label="Email (opcional)"
           placeholder="Email (opcional)"
           value={form.email}
           onChange={(e) => setForm({ ...form, email: e.target.value })}
         />
         <Input
+          label="Teléfono (opcional)"
           placeholder="Teléfono (opcional)"
           value={form.phone}
           onChange={(e) => setForm({ ...form, phone: e.target.value })}
