@@ -20,7 +20,7 @@ Monorepo con npm workspaces.
 npm install
 docker compose up -d          # Postgres local (requerido por better-auth)
 npm run migrate               # aplica las migraciones del dominio (Umzug) en apps/api
-npx @better-auth/cli migrate --config apps/api/src/config/auth.ts   # tablas propias de better-auth
+npm run migrate:auth          # tablas propias de better-auth
 npm run dev:api                # terminal 1
 npm run dev:web                # terminal 2
 ```

@@ -9,6 +9,7 @@
     "build": "esbuild src/server.ts --bundle --platform=node --format=esm --outfile=dist/server.js --packages=external",
     "start": "node dist/server.js",
     "migrate": "tsx src/db/migrate.ts up",
+    "migrate:auth": "better-auth migrate --config src/config/auth.ts -y",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
@@ -26,6 +27,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@better-auth/cli": "^1.4.21",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/node": "^22.14.0",
