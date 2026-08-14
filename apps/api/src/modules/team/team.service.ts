@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { auth } from '../../config/auth.js';
+import { NotFoundError } from '../../lib/errors.js';
 import { BusinessMember } from './team.model.js';
 import type { InviteMemberInput } from '@template/shared';
 
@@ -24,7 +25,7 @@ export const teamService = {
 
   async remove(businessId: string, memberId: string) {
     const member = await BusinessMember.findOne({ where: { id: memberId, businessId } });
-    if (!member) throw new Error('MEMBER_NOT_FOUND');
+    if (!member) throw new NotFoundError('MEMBER_NOT_FOUND');
     await member.destroy();
   },
 };
