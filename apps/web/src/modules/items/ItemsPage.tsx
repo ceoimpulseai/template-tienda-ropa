@@ -3,6 +3,7 @@ import type { FormEvent } from 'react';
 import { Card } from '../../ui/Card';
 import { Button } from '../../ui/Button';
 import { Input } from '../../ui/Input';
+import { Checkbox } from '../../ui/Checkbox';
 import { Table } from '../../ui/Table';
 import { useApi } from '../../lib/useApi';
 import { apiFetch } from '../../lib/apiFetch';
@@ -10,7 +11,7 @@ import { businessConfig } from '../../config/business.config';
 import type { Item } from '@template/shared';
 
 export function ItemsPage() {
-  const { data, loading, refetch } = useApi<Item[]>('/items');
+  const { data, loading, error, refetch } = useApi<Item[]>('/items');
   const [form, setForm] = useState({ name: '', price: '', stock: '' });
 
   async function handleSubmit(event: FormEvent) {
@@ -62,6 +63,8 @@ export function ItemsPage() {
         <Button type="submit">Agregar</Button>
       </form>
 
+      {error && <p className="mb-4 text-sm text-danger">{error}</p>}
+
       {loading ? (
         <p className="text-text-muted">Cargando…</p>
       ) : (
@@ -73,8 +76,7 @@ export function ItemsPage() {
             {
               header: 'Visible en catálogo público',
               render: (i) => (
-                <input
-                  type="checkbox"
+                <Checkbox
                   aria-label={`Visible en catálogo público: ${i.name}`}
                   checked={i.visibleInCatalog}
                   onChange={() => handleToggleVisible(i)}
