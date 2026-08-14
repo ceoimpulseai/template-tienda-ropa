@@ -1,15 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import type { Item } from '@template/shared';
 import { Card } from '../../ui/Card';
 import { Button } from '../../ui/Button';
 import { publicApiFetch } from '../../lib/publicApiFetch';
 import { CatalogCart } from './CatalogCart';
 
-interface CatalogItem {
-  id: string;
-  name: string;
-  price: number;
-}
+export type CatalogItem = Pick<Item, 'id' | 'name' | 'price'>;
 
 interface CatalogResponse {
   business: { name: string; whatsapp: string | null };

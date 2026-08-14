@@ -1,10 +1,5 @@
 import { Button } from '../../ui/Button';
-
-interface CatalogItem {
-  id: string;
-  name: string;
-  price: number;
-}
+import type { CatalogItem } from './PublicCatalogPage';
 
 interface CatalogCartProps {
   items: CatalogItem[];
