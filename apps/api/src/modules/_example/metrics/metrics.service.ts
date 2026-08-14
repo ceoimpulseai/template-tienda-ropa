@@ -1,6 +1,6 @@
 // EJEMPLO: adaptar a la lógica del rubro concreto.
 import { QueryTypes } from 'sequelize';
-import { sequelize } from '../../config/database.js';
+import { sequelize } from '../../../config/database.js';
 import { costService } from '../costs/cost.service.js';
 
 export interface DashboardMetrics {

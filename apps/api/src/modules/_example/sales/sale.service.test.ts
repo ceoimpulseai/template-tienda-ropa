@@ -1,10 +1,10 @@
 // EJEMPLO: adaptar a la lógica del rubro concreto.
 import { describe, expect, it, beforeAll } from 'vitest';
 import { randomUUID } from 'node:crypto';
-import { sequelize } from '../../config/database.js';
-import { Business } from '../business/business.model.js';
-import { Branch } from '../branches/branch.model.js';
-import { Item } from '../purchases/item.model.js';
+import { sequelize } from '../../../config/database.js';
+import { Business } from '../../business/business.model.js';
+import { Branch } from '../../branches/branch.model.js';
+import { Item } from '../../items/item.model.js';
 import { saleService } from './sale.service.js';
 
 beforeAll(async () => {

@@ -1,5 +1,6 @@
-// EJEMPLO: entidad genérica de referencia para los módulos purchases/sales.
-// Reemplazar por las entidades reales del rubro adaptado (ej. "Producto", "Corte", "Repuesto").
+// Entidad genérica: catálogo de items de un negocio. Se mantiene entre forks del
+// template (a diferencia de los módulos de ejemplo en `_example/`) porque
+// purchases, sales y el catálogo público dependen de ella.
 import {
   DataTypes,
   Model,
@@ -15,6 +16,7 @@ export class Item extends Model<InferAttributes<Item>, InferCreationAttributes<I
   declare name: string;
   declare price: number;
   declare stock: CreationOptional<number>;
+  declare visibleInCatalog: CreationOptional<boolean>;
 }
 
 Item.init(
@@ -24,6 +26,7 @@ Item.init(
     name: { type: DataTypes.STRING, allowNull: false },
     price: { type: DataTypes.FLOAT, allowNull: false },
     stock: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
+    visibleInCatalog: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
   },
   { sequelize, modelName: 'item', tableName: 'items' },
 );

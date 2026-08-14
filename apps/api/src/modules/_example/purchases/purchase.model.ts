@@ -6,27 +6,25 @@ import {
   type InferAttributes,
   type InferCreationAttributes,
 } from 'sequelize';
-import { sequelize } from '../../config/database.js';
+import { sequelize } from '../../../config/database.js';
 
-export class Sale extends Model<InferAttributes<Sale>, InferCreationAttributes<Sale>> {
+export class Purchase extends Model<InferAttributes<Purchase>, InferCreationAttributes<Purchase>> {
   declare id: CreationOptional<string>;
   declare businessId: string;
   declare branchId: string;
   declare itemId: string;
-  declare customerId: CreationOptional<string | null>;
   declare quantity: number;
-  declare unitPrice: number;
+  declare unitCost: number;
 }
 
-Sale.init(
+Purchase.init(
   {
     id: { type: DataTypes.UUID, primaryKey: true },
     businessId: { type: DataTypes.UUID, allowNull: false },
     branchId: { type: DataTypes.UUID, allowNull: false },
     itemId: { type: DataTypes.UUID, allowNull: false },
-    customerId: { type: DataTypes.UUID, allowNull: true },
     quantity: { type: DataTypes.FLOAT, allowNull: false },
-    unitPrice: { type: DataTypes.FLOAT, allowNull: false },
+    unitCost: { type: DataTypes.FLOAT, allowNull: false },
   },
-  { sequelize, modelName: 'sale', tableName: 'sales' },
+  { sequelize, modelName: 'purchase', tableName: 'purchases' },
 );

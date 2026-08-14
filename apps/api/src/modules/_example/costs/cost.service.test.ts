@@ -1,8 +1,8 @@
 // EJEMPLO: adaptar a la lógica del rubro concreto.
 import { describe, expect, it, beforeAll } from 'vitest';
 import { randomUUID } from 'node:crypto';
-import { sequelize } from '../../config/database.js';
-import { Business } from '../business/business.model.js';
+import { sequelize } from '../../../config/database.js';
+import { Business } from '../../business/business.model.js';
 import { costService } from './cost.service.js';
 
 beforeAll(async () => {

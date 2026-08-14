@@ -3,6 +3,7 @@ import { ThemeProvider } from './theme/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Layout } from './components/Layout';
+import { businessConfig } from './config/business.config';
 import { LoginPage } from './modules/auth/LoginPage';
 import { RegisterPage } from './modules/auth/RegisterPage';
 import { ForgotPasswordPage } from './modules/auth/ForgotPasswordPage';
@@ -11,10 +12,10 @@ import { TeamSettings } from './modules/team/TeamSettings';
 import { BusinessSettings } from './modules/business/BusinessSettings';
 import { BranchesSettings } from './modules/branches/BranchesSettings';
 import { CustomersPage } from './modules/customers/CustomersPage';
-import { PurchasesPage } from './modules/purchases/PurchasesPage';
-import { SalesPage } from './modules/sales/SalesPage';
-import { CostsPage } from './modules/costs/CostsPage';
-import { MetricsPage } from './modules/metrics/MetricsPage';
+import { PurchasesPage } from './modules/_example/purchases/PurchasesPage';
+import { SalesPage } from './modules/_example/sales/SalesPage';
+import { CostsPage } from './modules/_example/costs/CostsPage';
+import { MetricsPage } from './modules/_example/metrics/MetricsPage';
 
 export function App() {
   return (
@@ -28,10 +29,12 @@ export function App() {
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route element={<ProtectedRoute />}>
               <Route element={<Layout />}>
-                <Route path="/" element={<MetricsPage />} />
-                <Route path="/purchases" element={<PurchasesPage />} />
-                <Route path="/sales" element={<SalesPage />} />
-                <Route path="/costs" element={<CostsPage />} />
+                {businessConfig.enabledModules.metrics && <Route path="/" element={<MetricsPage />} />}
+                {businessConfig.enabledModules.purchases && (
+                  <Route path="/purchases" element={<PurchasesPage />} />
+                )}
+                {businessConfig.enabledModules.sales && <Route path="/sales" element={<SalesPage />} />}
+                {businessConfig.enabledModules.costs && <Route path="/costs" element={<CostsPage />} />}
                 <Route path="/customers" element={<CustomersPage />} />
                 <Route path="/team" element={<TeamSettings />} />
                 <Route path="/business" element={<BusinessSettings />} />

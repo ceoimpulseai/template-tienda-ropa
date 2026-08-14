@@ -1,12 +1,12 @@
 // EJEMPLO: adaptar a la lógica del rubro concreto.
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { Card } from '../../ui/Card';
-import { Button } from '../../ui/Button';
-import { Input } from '../../ui/Input';
-import { Table } from '../../ui/Table';
-import { useApi } from '../../lib/useApi';
-import { apiFetch } from '../../lib/apiFetch';
+import { Card } from '../../../ui/Card';
+import { Button } from '../../../ui/Button';
+import { Input } from '../../../ui/Input';
+import { Table } from '../../../ui/Table';
+import { useApi } from '../../../lib/useApi';
+import { apiFetch } from '../../../lib/apiFetch';
 import type { Purchase } from '@template/shared';
 
 export function PurchasesPage() {

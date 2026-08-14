@@ -47,30 +47,52 @@ levantar el server.
 
 ```
 apps/
-  api/src/modules/<dominio>/   # routes + controller + service + model (+ tests)
-  web/src/modules/<dominio>/   # componentes + hooks por dominio
+  api/src/modules/<dominio>/         # routes + controller + service + model (+ tests)
+  api/src/modules/_example/<dominio>/ # módulos de ejemplo (ver abajo)
+  web/src/modules/<dominio>/         # componentes + hooks por dominio
+  web/src/modules/_example/<dominio>/ # módulos de ejemplo (ver abajo)
   web/src/ui/                  # primitivos de diseño (Button, Card, Input, Modal, Badge, Table)
   web/src/theme/                # design tokens (CSS custom properties) + ThemeContext
 packages/shared/               # tipos y schemas Zod compartidos
 ```
 
-Módulos genéricos (no deberían necesitar cambios entre rubros): `auth`, `team`,
-`business`, `branches`, `customers`.
+Módulos genéricos (no deberían necesitar cambios entre rubros), en
+`apps/api/src/modules/` y `apps/web/src/modules/`: `auth`, `team`, `business`,
+`branches`, `customers`, `items`, `catalog`.
 
-Módulos de ejemplo (marcados con `// EJEMPLO` en cada archivo): `purchases`, `sales`,
-`costs`, `metrics`. Usan una entidad genérica `Item` — son el punto de partida a
-reemplazar por la lógica real del rubro.
+Módulos de ejemplo (marcados con `// EJEMPLO` en cada archivo), aislados en
+`apps/api/src/modules/_example/` y `apps/web/src/modules/_example/`: `purchases`,
+`sales`, `costs`, `metrics`. Dependen de la entidad genérica `Item` (módulo
+`items`, no `_example/`) — son el punto de partida a reemplazar por la lógica
+real del rubro. Al adaptar el template a un rubro nuevo, todo lo que hay que
+borrar/reescribir vive dentro de `_example/`; `items` se mantiene.
+
+## Catálogo público
+
+El módulo `catalog` expone un storefront público de solo lectura en
+`/tienda/:businessId` — sin autenticación, sin búsqueda/paginación, sin
+carrito/checkout real. La URL se deriva automáticamente del `id` (UUID) del
+negocio, no de un valor elegido por el usuario. Muestra nombre y precio de los
+items con `visibleInCatalog: true` y stock disponible del negocio dueño del
+`id`. El "carrito" es sólo estado local en el navegador que arma un link de
+WhatsApp (`wa.me`) con el pedido como texto — no hay modelo de orden ni pago.
+
+Un campo nuevo en `Business` habilita esto: `catalogWhatsapp` (número para el
+botón de pedido). Se edita desde `/business` (`BusinessSettings.tsx`), que
+también muestra la URL pública de solo lectura. Cada `Item` tiene
+`visibleInCatalog` (default `false`, opt-in) editable desde `/items`.
 
 ## Cómo adaptar este template a un rubro nuevo
 
 1. Editar `apps/web/src/config/business.config.ts`: nombre de la app, terminología
-   (ej. "Producto" → "Corte"), módulos habilitados, color de marca.
+   (ej. "Producto" → "Corte"), módulos habilitados, nav, color de marca.
 2. Reescribir los módulos de ejemplo (`purchases`, `sales`, `costs`, `metrics`) en
-   `apps/api/src/modules/` y `apps/web/src/modules/` con las entidades reales del
-   rubro, siguiendo el mismo patrón `route → controller → service → model` +
-   schema Zod en `packages/shared`.
-3. No debería hacer falta tocar `auth`, `team`, `business`, `branches`, ni los
-   primitivos de `apps/web/src/ui/`, ni el sistema de temas.
+   `apps/api/src/modules/_example/` y `apps/web/src/modules/_example/` con las
+   entidades reales del rubro, siguiendo el mismo patrón
+   `route → controller → service → model` + schema Zod en `packages/shared`.
+3. No debería hacer falta tocar `auth`, `team`, `business`, `branches`,
+   `customers`, `items`, `catalog`, ni los primitivos de `apps/web/src/ui/`, ni
+   el sistema de temas.
 
 ## Testing
 

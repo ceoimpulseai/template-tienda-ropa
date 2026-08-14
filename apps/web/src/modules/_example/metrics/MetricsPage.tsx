@@ -1,7 +1,7 @@
 // EJEMPLO: adaptar a la lógica del rubro concreto.
-import { Card } from '../../ui/Card';
-import { useApi } from '../../lib/useApi';
-import type { DashboardMetrics } from '../../types/metrics';
+import { Card } from '../../../ui/Card';
+import { useApi } from '../../../lib/useApi';
+import type { DashboardMetrics } from '../../../types/metrics';
 
 export function MetricsPage() {
   const { data, loading } = useApi<DashboardMetrics>('/metrics/dashboard');

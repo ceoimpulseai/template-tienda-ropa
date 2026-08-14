@@ -1,7 +1,7 @@
 // EJEMPLO: adaptar a la lógica del rubro concreto.
 import { randomUUID } from 'node:crypto';
-import { sequelize } from '../../config/database.js';
-import { Item } from './item.model.js';
+import { sequelize } from '../../../config/database.js';
+import { Item } from '../../items/item.model.js';
 import { Purchase } from './purchase.model.js';
 import type { CreatePurchaseInput } from '@template/shared';
 

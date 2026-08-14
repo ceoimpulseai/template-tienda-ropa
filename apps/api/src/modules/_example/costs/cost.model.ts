@@ -6,7 +6,7 @@ import {
   type InferAttributes,
   type InferCreationAttributes,
 } from 'sequelize';
-import { sequelize } from '../../config/database.js';
+import { sequelize } from '../../../config/database.js';
 
 export type CostType = 'fixed' | 'variable';
 

@@ -3,10 +3,10 @@ import { businessRoutes } from '../modules/business/business.routes.js';
 import { branchRoutes } from '../modules/branches/branch.routes.js';
 import { teamRoutes } from '../modules/team/team.routes.js';
 import { customerRoutes } from '../modules/customers/customer.routes.js';
-import { purchaseRoutes } from '../modules/purchases/purchase.routes.js';
-import { saleRoutes } from '../modules/sales/sale.routes.js';
-import { costRoutes } from '../modules/costs/cost.routes.js';
-import { metricsRoutes } from '../modules/metrics/metrics.routes.js';
+import { purchaseRoutes } from '../modules/_example/purchases/purchase.routes.js';
+import { saleRoutes } from '../modules/_example/sales/sale.routes.js';
+import { costRoutes } from '../modules/_example/costs/cost.routes.js';
+import { metricsRoutes } from '../modules/_example/metrics/metrics.routes.js';
 
 export const routes = Router();
 

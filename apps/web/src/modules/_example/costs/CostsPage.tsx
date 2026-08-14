@@ -1,13 +1,13 @@
 // EJEMPLO: adaptar a la lógica del rubro concreto.
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { Card } from '../../ui/Card';
-import { Button } from '../../ui/Button';
-import { Input } from '../../ui/Input';
-import { Table } from '../../ui/Table';
-import { Badge } from '../../ui/Badge';
-import { useApi } from '../../lib/useApi';
-import { apiFetch } from '../../lib/apiFetch';
+import { Card } from '../../../ui/Card';
+import { Button } from '../../../ui/Button';
+import { Input } from '../../../ui/Input';
+import { Table } from '../../../ui/Table';
+import { Badge } from '../../../ui/Badge';
+import { useApi } from '../../../lib/useApi';
+import { apiFetch } from '../../../lib/apiFetch';
 import type { Cost, CostType } from '@template/shared';
 
 export function CostsPage() {
