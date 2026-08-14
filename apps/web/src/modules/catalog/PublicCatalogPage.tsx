@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import type { Item } from '@template/shared';
 import { Card } from '../../ui/Card';
 import { Button } from '../../ui/Button';
 import { publicApiFetch } from '../../lib/publicApiFetch';
+import { useApi } from '../../lib/useApi';
 import { CatalogCart } from './CatalogCart';
 
 export type CatalogItem = Pick<Item, 'id' | 'name' | 'price'>;
@@ -15,32 +16,12 @@ interface CatalogResponse {
 
 export function PublicCatalogPage() {
   const { businessId } = useParams<{ businessId: string }>();
-  const [catalog, setCatalog] = useState<CatalogResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [notFound, setNotFound] = useState(false);
+  const {
+    data: catalog,
+    loading,
+    error,
+  } = useApi<CatalogResponse>(businessId ? `/catalog/${businessId}` : null, publicApiFetch);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
-
-  useEffect(() => {
-    if (!businessId) return;
-    let cancelled = false;
-    setLoading(true);
-    setNotFound(false);
-
-    publicApiFetch(`/catalog/${businessId}`)
-      .then((result: CatalogResponse) => {
-        if (!cancelled) setCatalog(result);
-      })
-      .catch(() => {
-        if (!cancelled) setNotFound(true);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [businessId]);
 
   function addOne(itemId: string) {
     setQuantities((q) => ({ ...q, [itemId]: (q[itemId] ?? 0) + 1 }));
@@ -54,7 +35,7 @@ export function PublicCatalogPage() {
     );
   }
 
-  if (notFound || !catalog) {
+  if (error || !catalog) {
     return (
       <div className="mx-auto max-w-3xl p-6">
         <p className="text-text-muted">Catálogo no encontrado.</p>
