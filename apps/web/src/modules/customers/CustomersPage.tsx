@@ -63,9 +63,9 @@ export function CustomersPage() {
             {
               header: '',
               render: (c) => (
-                <button onClick={() => handleRemove(c.id)} className="text-danger">
+                <Button variant="danger" onClick={() => handleRemove(c.id)}>
                   Quitar
-                </button>
+                </Button>
               ),
             },
           ]}
