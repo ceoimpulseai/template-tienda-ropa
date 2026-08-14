@@ -25,6 +25,15 @@ npm run dev:api                # terminal 1
 npm run dev:web                # terminal 2
 ```
 
+### Envío de emails (restablecer contraseña)
+
+`apps/api/src/lib/email.ts` es el único punto de envío de mails (nodemailer). Sin
+`SMTP_HOST` configurado, en dev usa una cuenta descartable de Ethereal (gratis, sin
+signup) y loguea un link de preview en la consola de `apps/api` — no llega a una
+bandeja real. Para producción, seteá `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`,
+`SMTP_PASSWORD`, `SMTP_FROM` con cualquier proveedor SMTP (Gmail con app password,
+Brevo, SES, etc.).
+
 `npm run migrate` sólo aplica las migraciones del dominio (`businesses`, `branches`,
 `business_members`, etc.). better-auth mantiene sus propias tablas (`user`, `session`,
 `account`, `verification`) vía un pool Postgres separado y necesita su propio comando

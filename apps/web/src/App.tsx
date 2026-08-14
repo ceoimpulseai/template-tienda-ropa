@@ -5,6 +5,8 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { Layout } from './components/Layout';
 import { LoginPage } from './modules/auth/LoginPage';
 import { RegisterPage } from './modules/auth/RegisterPage';
+import { ForgotPasswordPage } from './modules/auth/ForgotPasswordPage';
+import { ResetPasswordPage } from './modules/auth/ResetPasswordPage';
 import { TeamSettings } from './modules/team/TeamSettings';
 import { BusinessSettings } from './modules/business/BusinessSettings';
 import { BranchesSettings } from './modules/branches/BranchesSettings';
@@ -21,6 +23,8 @@ export function App() {
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route element={<ProtectedRoute />}>
               <Route element={<Layout />}>
                 <Route path="/" element={<MetricsPage />} />

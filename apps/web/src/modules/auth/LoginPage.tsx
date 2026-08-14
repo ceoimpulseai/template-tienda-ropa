@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card } from '../../ui/Card';
 import { Button } from '../../ui/Button';
 import { Input } from '../../ui/Input';
@@ -46,6 +46,9 @@ export function LoginPage() {
             Entrar
           </Button>
         </form>
+        <Link to="/forgot-password" className="mt-4 block text-center text-sm text-text-muted hover:text-text">
+          ¿Olvidaste tu contraseña?
+        </Link>
       </Card>
     </div>
   );

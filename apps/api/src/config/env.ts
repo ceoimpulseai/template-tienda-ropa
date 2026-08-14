@@ -13,6 +13,11 @@ const envSchema = z.object({
   DB_PASSWORD: z.string().optional(),
   BETTER_AUTH_SECRET: z.string().default('dev-secret-change-me'),
   BETTER_AUTH_URL: z.string().default('http://localhost:4000'),
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.coerce.number().optional(),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASSWORD: z.string().optional(),
+  SMTP_FROM: z.string().default('no-reply@template.local'),
 });
 
 export const env = envSchema.parse(process.env);

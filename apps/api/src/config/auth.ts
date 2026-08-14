@@ -1,6 +1,7 @@
 import { betterAuth } from 'better-auth';
 import { Pool } from 'pg';
 import { env } from './env.js';
+import { sendEmail } from '../lib/email.js';
 
 // better-auth mantiene sus propias tablas (user/session) vía un pool pg dedicado,
 // independiente de la conexión Sequelize usada para el resto del dominio.
@@ -24,6 +25,13 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,
+    sendResetPassword: async ({ user, url }) => {
+      await sendEmail({
+        to: user.email,
+        subject: 'Restablecer contraseña',
+        html: `<p>Pediste restablecer tu contraseña. <a href="${url}">Hacé click acá para elegir una nueva</a>.</p><p>Si no fuiste vos, ignorá este email.</p>`,
+      });
+    },
   },
   session: {
     expiresIn: 60 * 60 * 24 * 7,
