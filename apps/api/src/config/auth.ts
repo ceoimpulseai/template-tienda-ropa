@@ -19,6 +19,7 @@ const pool = env.DATABASE_URL
 export const auth = betterAuth({
   secret: env.BETTER_AUTH_SECRET,
   baseURL: env.BETTER_AUTH_URL,
+  trustedOrigins: [env.APP_URL],
   database: pool,
   emailAndPassword: {
     enabled: true,

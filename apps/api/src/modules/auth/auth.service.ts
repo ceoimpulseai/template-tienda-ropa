@@ -14,8 +14,12 @@ export const authService = {
     password: string;
     businessName: string;
   }) {
-    const created = await auth.api.signUpEmail({
+    // returnHeaders: true — signUpEmail se llama server-side (no vía el handler HTTP de
+    // better-auth), así que el Set-Cookie de sesión no se escribe solo: hay que reenviarlo
+    // a mano en el controller o el cliente queda "registrado" pero deslogueado.
+    const { headers, response } = await auth.api.signUpEmail({
       body: { name: input.name, email: input.email, password: input.password },
+      returnHeaders: true,
     });
 
     const business = await Business.create({ id: randomUUID(), name: input.businessName });
@@ -28,10 +32,10 @@ export const authService = {
     await BusinessMember.create({
       id: randomUUID(),
       businessId: business.id,
-      userId: created.user.id,
+      userId: response.user.id,
       role: 'admin',
     });
 
-    return { user: created.user, business };
+    return { user: response.user, business, headers };
   },
 };

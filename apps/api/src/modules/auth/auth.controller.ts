@@ -13,7 +13,9 @@ export const authController = {
   async register(req: Request, res: Response, next: NextFunction) {
     try {
       const input = registerSchema.parse(req.body);
-      const result = await authService.registerBusinessOwner(input);
+      const { headers, ...result } = await authService.registerBusinessOwner(input);
+      const setCookie = headers.getSetCookie?.() ?? [];
+      if (setCookie.length > 0) res.setHeader('set-cookie', setCookie);
       res.status(201).json(result);
     } catch (err) {
       next(err);

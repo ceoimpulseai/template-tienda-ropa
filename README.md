@@ -19,10 +19,16 @@ Monorepo con npm workspaces.
 ```bash
 npm install
 docker compose up -d          # Postgres local (requerido por better-auth)
-npm run migrate               # aplica las migraciones en apps/api
+npm run migrate               # aplica las migraciones del dominio (Umzug) en apps/api
+npx @better-auth/cli migrate --config apps/api/src/config/auth.ts   # tablas propias de better-auth
 npm run dev:api                # terminal 1
 npm run dev:web                # terminal 2
 ```
+
+`npm run migrate` sólo aplica las migraciones del dominio (`businesses`, `branches`,
+`business_members`, etc.). better-auth mantiene sus propias tablas (`user`, `session`,
+`account`, `verification`) vía un pool Postgres separado y necesita su propio comando
+de migración — sin correrlo, el registro/login falla con `relation "user" does not exist`.
 
 `apps/web` corre en `http://localhost:5173` y proxea `/api` hacia `apps/api`
 (`http://localhost:4000`). Copiá `apps/api/.env.example` a `apps/api/.env` antes de
