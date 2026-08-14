@@ -5,10 +5,11 @@ export const businessSchema = z.object({
   name: z.string().min(1),
   currencySymbol: z.string().default('$'),
   taxPercent: z.number().min(0).max(100).default(0),
+  catalogWhatsapp: z.string().nullable().default(null),
 });
 export type Business = z.infer<typeof businessSchema>;
 
 export const updateBusinessSchema = businessSchema
-  .pick({ name: true, currencySymbol: true, taxPercent: true })
+  .pick({ name: true, currencySymbol: true, taxPercent: true, catalogWhatsapp: true })
   .partial();
 export type UpdateBusinessInput = z.infer<typeof updateBusinessSchema>;

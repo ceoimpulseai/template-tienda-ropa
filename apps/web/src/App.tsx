@@ -12,6 +12,8 @@ import { TeamSettings } from './modules/team/TeamSettings';
 import { BusinessSettings } from './modules/business/BusinessSettings';
 import { BranchesSettings } from './modules/branches/BranchesSettings';
 import { CustomersPage } from './modules/customers/CustomersPage';
+import { ItemsPage } from './modules/items/ItemsPage';
+import { PublicCatalogPage } from './modules/catalog/PublicCatalogPage';
 import { PurchasesPage } from './modules/_example/purchases/PurchasesPage';
 import { SalesPage } from './modules/_example/sales/SalesPage';
 import { CostsPage } from './modules/_example/costs/CostsPage';
@@ -27,6 +29,9 @@ export function App() {
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
+            {businessConfig.enabledModules.catalog && (
+              <Route path="/tienda/:businessId" element={<PublicCatalogPage />} />
+            )}
             <Route element={<ProtectedRoute />}>
               <Route element={<Layout />}>
                 {businessConfig.enabledModules.metrics && <Route path="/" element={<MetricsPage />} />}
@@ -36,6 +41,7 @@ export function App() {
                 {businessConfig.enabledModules.sales && <Route path="/sales" element={<SalesPage />} />}
                 {businessConfig.enabledModules.costs && <Route path="/costs" element={<CostsPage />} />}
                 <Route path="/customers" element={<CustomersPage />} />
+                <Route path="/items" element={<ItemsPage />} />
                 <Route path="/team" element={<TeamSettings />} />
                 <Route path="/business" element={<BusinessSettings />} />
                 <Route path="/branches" element={<BranchesSettings />} />

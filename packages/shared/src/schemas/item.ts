@@ -1,18 +1,7 @@
-// EJEMPLO: entidad genérica de referencia para los módulos de ejemplo (purchases/sales/costs).
-// Reemplazar por las entidades reales del rubro adaptado.
+// EJEMPLO: schemas de referencia para los módulos de ejemplo (purchases/sales/costs).
+// Reemplazar por los schemas reales del rubro adaptado. La entidad `Item` en sí
+// es genérica y vive en `./items.ts`.
 import { z } from 'zod';
-
-export const itemSchema = z.object({
-  id: z.string(),
-  businessId: z.string(),
-  name: z.string().min(1),
-  price: z.number().nonnegative(),
-  stock: z.number().int().nonnegative().default(0),
-});
-export type Item = z.infer<typeof itemSchema>;
-
-export const createItemSchema = itemSchema.pick({ name: true, price: true, stock: true });
-export type CreateItemInput = z.infer<typeof createItemSchema>;
 
 export const purchaseSchema = z.object({
   id: z.string(),
