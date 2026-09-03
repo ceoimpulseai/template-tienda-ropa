@@ -4,4 +4,5 @@ export * from './schemas/branch.js';
 export * from './schemas/team.js';
 export * from './schemas/customer.js';
 export * from './schemas/item.js';
+export * from './schemas/supplier.js';
 export * from './schemas/example.js';

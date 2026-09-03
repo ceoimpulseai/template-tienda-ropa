@@ -51,6 +51,7 @@ const nav: NavEntry[] = [
   { to: '/purchases', label: 'Compras', moduleKey: 'purchases' },
   { to: '/sales', label: 'Ventas', moduleKey: 'sales' },
   { to: '/costs', label: 'Gastos', moduleKey: 'costs' },
+  { to: '/suppliers', label: 'Proveedores' },
   { to: '/customers', label: 'Clientes' },
   { to: '/team', label: 'Equipo' },
   { to: '/business', label: 'Negocio' },

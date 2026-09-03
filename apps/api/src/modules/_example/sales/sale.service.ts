@@ -17,6 +17,10 @@ export const saleService = {
       if (!item) throw new NotFoundError('ITEM_NOT_FOUND');
       if (item.stock < input.quantity) throw new ConflictError('INSUFFICIENT_STOCK');
 
+      const isInternal = input.isInternal ?? false;
+      const amountReceived =
+        input.amountReceived ?? (isInternal ? 0 : input.unitPrice * input.quantity);
+
       const sale = await Sale.create(
         {
           id: randomUUID(),
@@ -26,6 +30,8 @@ export const saleService = {
           customerId: input.customerId ?? null,
           quantity: input.quantity,
           unitPrice: input.unitPrice,
+          isInternal,
+          amountReceived,
         },
         { transaction },
       );

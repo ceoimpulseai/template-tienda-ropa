@@ -16,6 +16,8 @@ export class Sale extends Model<InferAttributes<Sale>, InferCreationAttributes<S
   declare customerId: CreationOptional<string | null>;
   declare quantity: number;
   declare unitPrice: number;
+  declare isInternal: CreationOptional<boolean>;
+  declare amountReceived: number;
 }
 
 Sale.init(
@@ -27,6 +29,8 @@ Sale.init(
     customerId: { type: DataTypes.UUID, allowNull: true },
     quantity: { type: DataTypes.FLOAT, allowNull: false },
     unitPrice: { type: DataTypes.FLOAT, allowNull: false },
+    isInternal: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+    amountReceived: { type: DataTypes.FLOAT, allowNull: false, defaultValue: 0 },
   },
   { sequelize, modelName: 'sale', tableName: 'sales' },
 );

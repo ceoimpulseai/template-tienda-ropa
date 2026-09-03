@@ -13,6 +13,7 @@ import { BusinessSettings } from './modules/business/BusinessSettings';
 import { BranchesSettings } from './modules/branches/BranchesSettings';
 import { CustomersPage } from './modules/customers/CustomersPage';
 import { ItemsPage } from './modules/items/ItemsPage';
+import { SuppliersPage } from './modules/suppliers/SuppliersPage';
 import { PublicCatalogPage } from './modules/catalog/PublicCatalogPage';
 import { PurchasesPage } from './modules/_example/purchases/PurchasesPage';
 import { SalesPage } from './modules/_example/sales/SalesPage';
@@ -42,6 +43,7 @@ export function App() {
                 {businessConfig.enabledModules.costs && <Route path="/costs" element={<CostsPage />} />}
                 <Route path="/customers" element={<CustomersPage />} />
                 <Route path="/items" element={<ItemsPage />} />
+                <Route path="/suppliers" element={<SuppliersPage />} />
                 <Route path="/team" element={<TeamSettings />} />
                 <Route path="/business" element={<BusinessSettings />} />
                 <Route path="/branches" element={<BranchesSettings />} />

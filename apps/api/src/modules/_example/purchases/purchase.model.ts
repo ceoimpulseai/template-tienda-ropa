@@ -13,6 +13,7 @@ export class Purchase extends Model<InferAttributes<Purchase>, InferCreationAttr
   declare businessId: string;
   declare branchId: string;
   declare itemId: string;
+  declare supplierId: CreationOptional<string | null>;
   declare quantity: number;
   declare unitCost: number;
 }
@@ -23,6 +24,7 @@ Purchase.init(
     businessId: { type: DataTypes.UUID, allowNull: false },
     branchId: { type: DataTypes.UUID, allowNull: false },
     itemId: { type: DataTypes.UUID, allowNull: false },
+    supplierId: { type: DataTypes.UUID, allowNull: true },
     quantity: { type: DataTypes.FLOAT, allowNull: false },
     unitCost: { type: DataTypes.FLOAT, allowNull: false },
   },

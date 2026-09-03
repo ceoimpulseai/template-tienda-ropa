@@ -42,6 +42,7 @@ export function CostsPage() {
         >
           <option value="fixed">Fijo</option>
           <option value="variable">Variable</option>
+          <option value="extraordinary">Extraordinario</option>
         </select>
         <Input
           placeholder="Concepto"
@@ -66,7 +67,11 @@ export function CostsPage() {
           columns={[
             {
               header: 'Tipo',
-              render: (c) => <Badge tone={c.type === 'fixed' ? 'neutral' : 'warning'}>{c.type}</Badge>,
+              render: (c) => (
+                <Badge tone={c.type === 'fixed' ? 'neutral' : c.type === 'extraordinary' ? 'danger' : 'warning'}>
+                  {c.type === 'fixed' ? 'Fijo' : c.type === 'extraordinary' ? 'Extraordinario' : 'Variable'}
+                </Badge>
+              ),
             },
             { header: 'Concepto', render: (c) => c.label },
             { header: 'Monto', render: (c) => c.amount },

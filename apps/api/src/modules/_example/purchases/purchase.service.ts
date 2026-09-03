@@ -22,6 +22,7 @@ export const purchaseService = {
           businessId,
           branchId,
           itemId: input.itemId,
+          supplierId: input.supplierId ?? null,
           quantity: input.quantity,
           unitCost: input.unitCost,
         },

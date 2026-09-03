@@ -42,4 +42,46 @@ describe('saleService', () => {
       saleService.create(business.id, branch.id, { itemId: item.id, quantity: 5, unitPrice: 15 }),
     ).rejects.toThrow('INSUFFICIENT_STOCK');
   });
+
+  it('registers an internal sale with zero amountReceived by default', async () => {
+    const business = await Business.create({ id: randomUUID(), name: 'Test 3' });
+    const branch = await Branch.create({
+      id: randomUUID(),
+      businessId: business.id,
+      name: 'Principal',
+      isDefault: true,
+    });
+    const item = await Item.create({ id: randomUUID(), businessId: business.id, name: 'Item C', price: 10, stock: 5 });
+
+    const sale = await saleService.create(business.id, branch.id, {
+      itemId: item.id,
+      quantity: 2,
+      unitPrice: 10,
+      isInternal: true,
+    });
+
+    expect(sale.isInternal).toBe(true);
+    expect(sale.amountReceived).toBe(0);
+  });
+
+  it('decrements stock for internal sales too', async () => {
+    const business = await Business.create({ id: randomUUID(), name: 'Test 4' });
+    const branch = await Branch.create({
+      id: randomUUID(),
+      businessId: business.id,
+      name: 'Principal',
+      isDefault: true,
+    });
+    const item = await Item.create({ id: randomUUID(), businessId: business.id, name: 'Item D', price: 10, stock: 3 });
+
+    await saleService.create(business.id, branch.id, {
+      itemId: item.id,
+      quantity: 1,
+      unitPrice: 10,
+      isInternal: true,
+    });
+
+    await item.reload();
+    expect(item.stock).toBe(2);
+  });
 });

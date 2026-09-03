@@ -16,7 +16,7 @@ export const metricsService = {
   // referencia, que traían todo el dataset al cliente y calculaban ahí).
   async dashboard(businessId: string): Promise<DashboardMetrics> {
     const [salesRow] = await sequelize.query<{ totalRevenue: string | null; salesCount: string | null }>(
-      `SELECT SUM(quantity * "unitPrice") AS "totalRevenue", COUNT(*) AS "salesCount"
+      `SELECT SUM("amountReceived") AS "totalRevenue", COUNT(*) AS "salesCount"
        FROM sales WHERE "businessId" = :businessId`,
       { replacements: { businessId }, type: QueryTypes.SELECT },
     );
