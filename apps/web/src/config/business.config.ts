@@ -1,5 +1,8 @@
 // Único archivo pensado para editar al adaptar el template a un rubro nuevo.
 // No debería hacer falta tocar lógica de módulos para cambiar de rubro — solo esto.
+//
+// Para cambiar la PALETA DE COLORES del cliente, editá `src/theme/palette.css`.
+// Para cambiar terminología, módulos habilitados, o nav, editá este archivo.
 export interface NavEntry {
   to: string;
   label: string;
@@ -25,9 +28,6 @@ export interface BusinessConfig {
     catalog: boolean;
   };
   nav: NavEntry[];
-  branding: {
-    primaryColor: string; // aplicado a --color-primary en ambos temas por ThemeContext
-  };
 }
 
 const terminology = {
@@ -63,7 +63,4 @@ export const businessConfig: BusinessConfig = {
   terminology,
   enabledModules,
   nav,
-  branding: {
-    primaryColor: '#2563eb',
-  },
 };
