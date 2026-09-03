@@ -6,3 +6,6 @@ coverage
 *.sqlite
 .DS_Store
 .atl/
+/.agents
+/.claude
+/.github
