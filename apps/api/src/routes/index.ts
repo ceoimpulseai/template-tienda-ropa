@@ -10,6 +10,7 @@ import { purchaseRoutes } from '../modules/_example/purchases/purchase.routes.js
 import { saleRoutes } from '../modules/_example/sales/sale.routes.js';
 import { costRoutes } from '../modules/_example/costs/cost.routes.js';
 import { metricsRoutes } from '../modules/_example/metrics/metrics.routes.js';
+import { financialsRoutes } from '../modules/_example/financials/financials.routes.js';
 
 export const routes = Router();
 
@@ -26,3 +27,4 @@ routes.use('/purchases', purchaseRoutes);
 routes.use('/sales', saleRoutes);
 routes.use('/costs', costRoutes);
 routes.use('/metrics', metricsRoutes);
+routes.use('/financials', financialsRoutes);

@@ -28,13 +28,21 @@ describe('metricsService.dashboard', () => {
     await purchaseService.create(business.id, branch.id, { itemId: item.id, quantity: 10, unitCost: 5 });
     await saleService.create(business.id, branch.id, { itemId: item.id, quantity: 4, unitPrice: 20 });
     await costService.create(business.id, { type: 'fixed', label: 'Alquiler', amount: 1000 });
+    await costService.create(business.id, { type: 'variable', label: 'Flete', amount: 200 });
+    await costService.create(business.id, { type: 'extraordinary', label: 'Incendio', amount: 500 });
 
     const metrics = await metricsService.dashboard(business.id);
 
     expect(metrics.totalRevenue).toBe(80);
     expect(metrics.totalCost).toBe(50);
     expect(metrics.grossProfit).toBe(30);
+    expect(metrics.grossMarginPercent).toBe(37.5);
     expect(metrics.totalFixedCosts).toBe(1000);
+    expect(metrics.totalVariableCosts).toBe(200);
+    expect(metrics.totalExtraordinaryCosts).toBe(500);
+    expect(metrics.netProfit).toBe(-1670);
+    expect(metrics.netMarginPercent).toBe(-2087.5);
+    expect(metrics.breakEvenRevenue).toBeCloseTo(2666.67, 0);
     expect(metrics.salesCount).toBe(1);
   });
 });

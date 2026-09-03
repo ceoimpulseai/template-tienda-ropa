@@ -14,11 +14,11 @@ describe('createCostSchema', () => {
 });
 
 describe('createSaleSchema', () => {
-  it('defaults isInternal to false and amountReceived to undefined for normal sales', () => {
+  it('leaves isInternal undefined and amountReceived undefined for normal sales', () => {
     const result = createSaleSchema.safeParse({ itemId: 'abc', quantity: 2, unitPrice: 10 });
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.isInternal).toBe(false);
+      expect(result.data.isInternal).toBeUndefined();
       expect(result.data.amountReceived).toBeUndefined();
     }
   });

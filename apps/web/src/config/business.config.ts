@@ -24,6 +24,7 @@ export interface BusinessConfig {
     purchases: boolean;
     sales: boolean;
     costs: boolean;
+    financials: boolean;
     metrics: boolean;
     catalog: boolean;
   };
@@ -41,6 +42,7 @@ const enabledModules = {
   purchases: true,
   sales: true,
   costs: true,
+  financials: true,
   metrics: true,
   catalog: true,
 };
@@ -51,6 +53,7 @@ const nav: NavEntry[] = [
   { to: '/purchases', label: 'Compras', moduleKey: 'purchases' },
   { to: '/sales', label: 'Ventas', moduleKey: 'sales' },
   { to: '/costs', label: 'Gastos', moduleKey: 'costs' },
+  { to: '/financials', label: 'Financiero', moduleKey: 'financials' },
   { to: '/suppliers', label: 'Proveedores' },
   { to: '/customers', label: 'Clientes' },
   { to: '/team', label: 'Equipo' },

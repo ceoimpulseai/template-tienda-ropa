@@ -38,7 +38,7 @@ export const createSaleSchema = saleSchema
   .pick({ itemId: true, quantity: true, unitPrice: true })
   .extend({
     customerId: z.string().optional(),
-    isInternal: z.boolean().optional().default(false),
+    isInternal: z.boolean().optional(),
     amountReceived: z.number().nonnegative().optional(),
   });
 export type CreateSaleInput = z.infer<typeof createSaleSchema>;

@@ -19,6 +19,7 @@ import { PurchasesPage } from './modules/_example/purchases/PurchasesPage';
 import { SalesPage } from './modules/_example/sales/SalesPage';
 import { CostsPage } from './modules/_example/costs/CostsPage';
 import { MetricsPage } from './modules/_example/metrics/MetricsPage';
+import { FinancialsPage } from './modules/_example/financials/FinancialsPage';
 
 export function App() {
   return (
@@ -41,6 +42,9 @@ export function App() {
                 )}
                 {businessConfig.enabledModules.sales && <Route path="/sales" element={<SalesPage />} />}
                 {businessConfig.enabledModules.costs && <Route path="/costs" element={<CostsPage />} />}
+                {businessConfig.enabledModules.financials && (
+                  <Route path="/financials" element={<FinancialsPage />} />
+                )}
                 <Route path="/customers" element={<CustomersPage />} />
                 <Route path="/items" element={<ItemsPage />} />
                 <Route path="/suppliers" element={<SuppliersPage />} />

@@ -6,3 +6,4 @@ export * from './schemas/customer.js';
 export * from './schemas/item.js';
 export * from './schemas/supplier.js';
 export * from './schemas/example.js';
+export * from './schemas/financials.js';
