@@ -5,6 +5,7 @@ import { Button } from '../../ui/Button';
 import { Input } from '../../ui/Input';
 import { Checkbox } from '../../ui/Checkbox';
 import { Table } from '../../ui/Table';
+import { Modal } from '../../ui/Modal';
 import { useApi } from '../../lib/useApi';
 import { apiFetch } from '../../lib/apiFetch';
 import { businessConfig } from '../../config/business.config';
@@ -12,7 +13,13 @@ import type { Item } from '@template/shared';
 
 export function ItemsPage() {
   const { data, loading, error, refetch } = useApi<Item[]>('/items');
+  const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState({ name: '', price: '', stock: '' });
+
+  function openCreate() {
+    setForm({ name: '', price: '', stock: '' });
+    setModalOpen(true);
+  }
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -20,7 +27,7 @@ export function ItemsPage() {
       method: 'POST',
       body: JSON.stringify({ name: form.name, price: Number(form.price), stock: Number(form.stock) }),
     });
-    setForm({ name: '', price: '', stock: '' });
+    setModalOpen(false);
     refetch();
   }
 
@@ -34,34 +41,10 @@ export function ItemsPage() {
 
   return (
     <Card>
-      <h2 className="mb-4 text-lg font-semibold text-text">{businessConfig.terminology.itemPlural}</h2>
-
-      <form onSubmit={handleSubmit} className="mb-4 flex flex-wrap gap-2">
-        <Input
-          label="Nombre"
-          placeholder="Nombre"
-          value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
-          required
-        />
-        <Input
-          type="number"
-          label="Precio"
-          placeholder="Precio"
-          value={form.price}
-          onChange={(e) => setForm({ ...form, price: e.target.value })}
-          required
-        />
-        <Input
-          type="number"
-          label="Stock"
-          placeholder="Stock"
-          value={form.stock}
-          onChange={(e) => setForm({ ...form, stock: e.target.value })}
-          required
-        />
-        <Button type="submit">Agregar</Button>
-      </form>
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-text">{businessConfig.terminology.itemPlural}</h2>
+        <Button type="button" onClick={openCreate}>Nuevo {businessConfig.terminology.item}</Button>
+      </div>
 
       {error && <p className="mb-4 text-sm text-danger">{error}</p>}
 
@@ -88,6 +71,35 @@ export function ItemsPage() {
           rowKey={(i) => i.id}
         />
       )}
+
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={`Nuevo ${businessConfig.terminology.item}`}>
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <Input
+            placeholder="Nombre"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            required
+          />
+          <Input
+            type="number"
+            placeholder="Precio"
+            value={form.price}
+            onChange={(e) => setForm({ ...form, price: e.target.value })}
+            required
+          />
+          <Input
+            type="number"
+            placeholder="Stock"
+            value={form.stock}
+            onChange={(e) => setForm({ ...form, stock: e.target.value })}
+            required
+          />
+          <div className="flex justify-end gap-2 pt-2">
+            <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>Cancelar</Button>
+            <Button type="submit">Agregar</Button>
+          </div>
+        </form>
+      </Modal>
     </Card>
   );
 }

@@ -7,12 +7,15 @@ import { Input } from '../../../ui/Input';
 import { Checkbox } from '../../../ui/Checkbox';
 import { Table } from '../../../ui/Table';
 import { Badge } from '../../../ui/Badge';
+import { Modal } from '../../../ui/Modal';
 import { useApi } from '../../../lib/useApi';
 import { apiFetch } from '../../../lib/apiFetch';
-import type { Sale } from '@template/shared';
+import type { Item, Sale } from '@template/shared';
 
 export function SalesPage() {
   const { data, loading, refetch } = useApi<Sale[]>('/sales');
+  const { data: items } = useApi<Item[]>('/items');
+  const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState({
     itemId: '',
     customerId: '',
@@ -21,6 +24,11 @@ export function SalesPage() {
     isInternal: false,
     amountReceived: undefined as number | undefined,
   });
+
+  function openCreate() {
+    setForm({ itemId: '', customerId: '', quantity: 1, unitPrice: 0, isInternal: false, amountReceived: undefined });
+    setModalOpen(true);
+  }
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -33,59 +41,16 @@ export function SalesPage() {
       payload.amountReceived = amountReceived;
     }
     await apiFetch('/sales', { method: 'POST', body: JSON.stringify(payload) });
-    setForm({ itemId: '', customerId: '', quantity: 1, unitPrice: 0, isInternal: false, amountReceived: undefined });
+    setModalOpen(false);
     refetch();
   }
 
   return (
     <Card>
-      <h2 className="mb-4 text-lg font-semibold text-text">Ventas</h2>
-
-      <form onSubmit={handleSubmit} className="mb-4 flex flex-wrap items-end gap-2">
-        <Input
-          placeholder="ID de producto"
-          value={form.itemId}
-          onChange={(e) => setForm({ ...form, itemId: e.target.value })}
-          required
-        />
-        <Input
-          type="number"
-          placeholder="Cantidad"
-          value={form.quantity}
-          onChange={(e) => setForm({ ...form, quantity: Number(e.target.value) })}
-          required
-        />
-        <Input
-          type="number"
-          placeholder="Precio unitario"
-          value={form.unitPrice}
-          onChange={(e) => setForm({ ...form, unitPrice: Number(e.target.value) })}
-          required
-        />
-        <Input
-          placeholder="ID de cliente (opcional)"
-          value={form.customerId}
-          onChange={(e) => setForm({ ...form, customerId: e.target.value })}
-        />
-        <label className="flex items-center gap-2 text-sm text-text">
-          <Checkbox
-            checked={form.isInternal}
-            onChange={(e) => {
-              setForm({ ...form, isInternal: e.target.checked, amountReceived: e.target.checked ? 0 : undefined });
-            }}
-          />
-          Venta interna
-        </label>
-        {form.isInternal && (
-          <Input
-            type="number"
-            placeholder="Monto recibido"
-            value={form.amountReceived ?? 0}
-            onChange={(e) => setForm({ ...form, amountReceived: Number(e.target.value) })}
-          />
-        )}
-        <Button type="submit">Registrar venta</Button>
-      </form>
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-text">Ventas</h2>
+        <Button type="button" onClick={openCreate}>Nueva venta</Button>
+      </div>
 
       {loading ? (
         <p className="text-text-muted">Cargando…</p>
@@ -109,6 +74,64 @@ export function SalesPage() {
           rowKey={(s) => s.id}
         />
       )}
+
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Nueva venta">
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <select
+            value={form.itemId}
+            onChange={(e) => setForm({ ...form, itemId: e.target.value })}
+            required
+            className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm text-text"
+          >
+            <option value="">Seleccionar producto</option>
+            {(items ?? []).map((i) => (
+              <option key={i.id} value={i.id}>
+                {i.name} — ${i.price}
+              </option>
+            ))}
+          </select>
+          <Input
+            type="number"
+            placeholder="Cantidad"
+            value={form.quantity}
+            onChange={(e) => setForm({ ...form, quantity: Number(e.target.value) })}
+            required
+          />
+          <Input
+            type="number"
+            placeholder="Precio unitario"
+            value={form.unitPrice}
+            onChange={(e) => setForm({ ...form, unitPrice: Number(e.target.value) })}
+            required
+          />
+          <Input
+            placeholder="ID de cliente (opcional)"
+            value={form.customerId}
+            onChange={(e) => setForm({ ...form, customerId: e.target.value })}
+          />
+          <label className="flex items-center gap-2 text-sm text-text">
+            <Checkbox
+              checked={form.isInternal}
+              onChange={(e) => {
+                setForm({ ...form, isInternal: e.target.checked, amountReceived: e.target.checked ? 0 : undefined });
+              }}
+            />
+            Venta interna
+          </label>
+          {form.isInternal && (
+            <Input
+              type="number"
+              placeholder="Monto recibido"
+              value={form.amountReceived ?? 0}
+              onChange={(e) => setForm({ ...form, amountReceived: Number(e.target.value) })}
+            />
+          )}
+          <div className="flex justify-end gap-2 pt-2">
+            <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>Cancelar</Button>
+            <Button type="submit">Registrar venta</Button>
+          </div>
+        </form>
+      </Modal>
     </Card>
   );
 }

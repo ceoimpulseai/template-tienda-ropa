@@ -3,12 +3,14 @@ import type { FormEvent } from 'react';
 import { Card } from '../../ui/Card';
 import { Button } from '../../ui/Button';
 import { Input } from '../../ui/Input';
+import { Modal } from '../../ui/Modal';
 import { useApi } from '../../lib/useApi';
 import { apiFetch } from '../../lib/apiFetch';
 import type { Business } from '@template/shared';
 
 export function BusinessSettings() {
   const { data: business, loading, refetch } = useApi<Business>('/business');
+  const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState({
     name: '',
     currencySymbol: '$',
@@ -45,6 +47,7 @@ export function BusinessSettings() {
         catalogWhatsapp: form.catalogWhatsapp || null,
       }),
     });
+    setModalOpen(false);
     refetch();
   }
 
@@ -52,48 +55,55 @@ export function BusinessSettings() {
 
   return (
     <Card>
-      <h2 className="mb-4 text-lg font-semibold text-text">Información del negocio</h2>
-      <form onSubmit={handleSubmit} className="space-y-3">
-        <Input
-          placeholder="Nombre del negocio"
-          value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
-        />
-        <Input
-          placeholder="Símbolo de moneda"
-          value={form.currencySymbol}
-          onChange={(e) => setForm({ ...form, currencySymbol: e.target.value })}
-        />
-        <Input
-          type="number"
-          placeholder="IVA %"
-          value={form.taxPercent}
-          onChange={(e) => setForm({ ...form, taxPercent: Number(e.target.value) })}
-        />
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-text">Información del negocio</h2>
+        <Button type="button" onClick={() => setModalOpen(true)}>Editar</Button>
+      </div>
 
-        {business && (
-          <div className="flex items-center gap-2 text-xs text-text-muted">
-            <span>
-              URL pública: <span className="font-mono">/tienda/{business.id}</span>
-            </span>
-            <button
-              type="button"
-              onClick={() => copyCatalogUrl(business.id)}
-              className="rounded-md border border-border px-2 py-1 text-text hover:bg-bg-subtle"
-            >
-              {copied ? 'Copiado' : 'Copiar link'}
-            </button>
+      {business && (
+        <div className="flex items-center gap-2 text-xs text-text-muted">
+          <span>
+            URL pública: <span className="font-mono">/tienda/{business.id}</span>
+          </span>
+          <button
+            type="button"
+            onClick={() => copyCatalogUrl(business.id)}
+            className="rounded-md border border-border px-2 py-1 text-text hover:bg-bg-subtle"
+          >
+            {copied ? 'Copiado' : 'Copiar link'}
+          </button>
+        </div>
+      )}
+
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Editar negocio">
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <Input
+            placeholder="Nombre del negocio"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+          />
+          <Input
+            placeholder="Símbolo de moneda"
+            value={form.currencySymbol}
+            onChange={(e) => setForm({ ...form, currencySymbol: e.target.value })}
+          />
+          <Input
+            type="number"
+            placeholder="IVA %"
+            value={form.taxPercent}
+            onChange={(e) => setForm({ ...form, taxPercent: Number(e.target.value) })}
+          />
+          <Input
+            placeholder="WhatsApp para pedidos (ej. +54 9 11 1234-5678)"
+            value={form.catalogWhatsapp}
+            onChange={(e) => setForm({ ...form, catalogWhatsapp: e.target.value })}
+          />
+          <div className="flex justify-end gap-2 pt-2">
+            <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>Cancelar</Button>
+            <Button type="submit">Guardar</Button>
           </div>
-        )}
-
-        <Input
-          placeholder="WhatsApp para pedidos (ej. +54 9 11 1234-5678)"
-          value={form.catalogWhatsapp}
-          onChange={(e) => setForm({ ...form, catalogWhatsapp: e.target.value })}
-        />
-
-        <Button type="submit">Guardar</Button>
-      </form>
+        </form>
+      </Modal>
     </Card>
   );
 }

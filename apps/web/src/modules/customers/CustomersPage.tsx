@@ -4,18 +4,25 @@ import { Card } from '../../ui/Card';
 import { Button } from '../../ui/Button';
 import { Input } from '../../ui/Input';
 import { Table } from '../../ui/Table';
+import { Modal } from '../../ui/Modal';
 import { useApi } from '../../lib/useApi';
 import { apiFetch } from '../../lib/apiFetch';
 import type { Customer } from '@template/shared';
 
 export function CustomersPage() {
   const { data, loading, refetch } = useApi<Customer[]>('/customers');
+  const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState({ name: '', email: '', phone: '' });
+
+  function openCreate() {
+    setForm({ name: '', email: '', phone: '' });
+    setModalOpen(true);
+  }
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     await apiFetch('/customers', { method: 'POST', body: JSON.stringify(form) });
-    setForm({ name: '', email: '', phone: '' });
+    setModalOpen(false);
     refetch();
   }
 
@@ -26,31 +33,10 @@ export function CustomersPage() {
 
   return (
     <Card>
-      <h2 className="mb-4 text-lg font-semibold text-text">Clientes</h2>
-
-      <form onSubmit={handleSubmit} className="mb-4 flex flex-wrap gap-2">
-        <Input
-          label="Nombre"
-          placeholder="Nombre"
-          value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
-          required
-        />
-        <Input
-          type="email"
-          label="Email (opcional)"
-          placeholder="Email (opcional)"
-          value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-        />
-        <Input
-          label="Teléfono (opcional)"
-          placeholder="Teléfono (opcional)"
-          value={form.phone}
-          onChange={(e) => setForm({ ...form, phone: e.target.value })}
-        />
-        <Button type="submit">Agregar</Button>
-      </form>
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-text">Clientes</h2>
+        <Button type="button" onClick={openCreate}>Nuevo cliente</Button>
+      </div>
 
       {loading ? (
         <p className="text-text-muted">Cargando…</p>
@@ -73,6 +59,32 @@ export function CustomersPage() {
           rowKey={(c) => c.id}
         />
       )}
+
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Nuevo cliente">
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <Input
+            placeholder="Nombre"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            required
+          />
+          <Input
+            type="email"
+            placeholder="Email (opcional)"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+          />
+          <Input
+            placeholder="Teléfono (opcional)"
+            value={form.phone}
+            onChange={(e) => setForm({ ...form, phone: e.target.value })}
+          />
+          <div className="flex justify-end gap-2 pt-2">
+            <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>Cancelar</Button>
+            <Button type="submit">Agregar</Button>
+          </div>
+        </form>
+      </Modal>
     </Card>
   );
 }

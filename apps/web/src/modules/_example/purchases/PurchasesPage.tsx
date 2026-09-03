@@ -5,14 +5,22 @@ import { Card } from '../../../ui/Card';
 import { Button } from '../../../ui/Button';
 import { Input } from '../../../ui/Input';
 import { Table } from '../../../ui/Table';
+import { Modal } from '../../../ui/Modal';
 import { useApi } from '../../../lib/useApi';
 import { apiFetch } from '../../../lib/apiFetch';
-import type { Purchase, Supplier } from '@template/shared';
+import type { Item, Purchase, Supplier } from '@template/shared';
 
 export function PurchasesPage() {
   const { data: purchases, loading, refetch } = useApi<Purchase[]>('/purchases');
+  const { data: items } = useApi<Item[]>('/items');
   const { data: suppliers } = useApi<Supplier[]>('/suppliers');
+  const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState({ itemId: '', quantity: 1, unitCost: 0, supplierId: '' });
+
+  function openCreate() {
+    setForm({ itemId: '', quantity: 1, unitCost: 0, supplierId: '' });
+    setModalOpen(true);
+  }
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -21,7 +29,7 @@ export function PurchasesPage() {
       method: 'POST',
       body: JSON.stringify(supplierId ? { ...rest, supplierId } : rest),
     });
-    setForm({ itemId: '', quantity: 1, unitCost: 0, supplierId: '' });
+    setModalOpen(false);
     refetch();
   }
 
@@ -33,43 +41,10 @@ export function PurchasesPage() {
 
   return (
     <Card>
-      <h2 className="mb-4 text-lg font-semibold text-text">Compras</h2>
-
-      <form onSubmit={handleSubmit} className="mb-4 flex flex-wrap items-end gap-2">
-        <Input
-          placeholder="ID de producto"
-          value={form.itemId}
-          onChange={(e) => setForm({ ...form, itemId: e.target.value })}
-          required
-        />
-        <Input
-          type="number"
-          placeholder="Cantidad"
-          value={form.quantity}
-          onChange={(e) => setForm({ ...form, quantity: Number(e.target.value) })}
-          required
-        />
-        <Input
-          type="number"
-          placeholder="Costo unitario"
-          value={form.unitCost}
-          onChange={(e) => setForm({ ...form, unitCost: Number(e.target.value) })}
-          required
-        />
-        <select
-          value={form.supplierId}
-          onChange={(e) => setForm({ ...form, supplierId: e.target.value })}
-          className="rounded-lg border border-border bg-bg px-3 py-2 text-sm text-text"
-        >
-          <option value="">Sin proveedor</option>
-          {(suppliers ?? []).map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.name}
-            </option>
-          ))}
-        </select>
-        <Button type="submit">Registrar compra</Button>
-      </form>
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-text">Compras</h2>
+        <Button type="button" onClick={openCreate}>Nueva compra</Button>
+      </div>
 
       {loading ? (
         <p className="text-text-muted">Cargando…</p>
@@ -85,6 +60,54 @@ export function PurchasesPage() {
           rowKey={(p) => p.id}
         />
       )}
+
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Nueva compra">
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <select
+            value={form.itemId}
+            onChange={(e) => setForm({ ...form, itemId: e.target.value })}
+            required
+            className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm text-text"
+          >
+            <option value="">Seleccionar producto</option>
+            {(items ?? []).map((i) => (
+              <option key={i.id} value={i.id}>
+                {i.name} — ${i.price}
+              </option>
+            ))}
+          </select>
+          <Input
+            type="number"
+            placeholder="Cantidad"
+            value={form.quantity}
+            onChange={(e) => setForm({ ...form, quantity: Number(e.target.value) })}
+            required
+          />
+          <Input
+            type="number"
+            placeholder="Costo unitario"
+            value={form.unitCost}
+            onChange={(e) => setForm({ ...form, unitCost: Number(e.target.value) })}
+            required
+          />
+          <select
+            value={form.supplierId}
+            onChange={(e) => setForm({ ...form, supplierId: e.target.value })}
+            className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm text-text"
+          >
+            <option value="">Sin proveedor</option>
+            {(suppliers ?? []).map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name}
+              </option>
+            ))}
+          </select>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>Cancelar</Button>
+            <Button type="submit">Registrar compra</Button>
+          </div>
+        </form>
+      </Modal>
     </Card>
   );
 }
