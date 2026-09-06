@@ -6,6 +6,7 @@ import { Input } from '../../ui/Input';
 import { Table } from '../../ui/Table';
 import { Badge } from '../../ui/Badge';
 import { Modal } from '../../ui/Modal';
+import { PageHeader } from '../../components/PageHeader';
 import { useTeam } from './useTeam';
 import type { BusinessMember } from '@template/shared';
 
@@ -22,13 +23,15 @@ export function TeamSettings() {
   }
 
   return (
-    <Card>
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-text">Equipo</h2>
-        <Button onClick={() => setOpen(true)}>Agregar empleado</Button>
-      </div>
+    <div>
+      <PageHeader
+        title="Equipo"
+        description="Administración de colaboradores, asignación de roles y permisos de acceso."
+        action={<Button onClick={() => setOpen(true)}>Agregar empleado</Button>}
+      />
 
-      {loading ? (
+      <Card>
+        {loading ? (
         <p className="text-text-muted">Cargando…</p>
       ) : (
         <Table<BusinessMember>
@@ -81,5 +84,6 @@ export function TeamSettings() {
         </form>
       </Modal>
     </Card>
+    </div>
   );
 }

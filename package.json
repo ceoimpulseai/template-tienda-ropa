@@ -6,6 +6,7 @@
   "engines": { "node": ">=20" },
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
+    "dev": "npm run dev --workspace=apps/web",
     "dev:api": "npm run dev -w apps/api",
     "dev:web": "npm run dev -w apps/web",
     "build": "npm run build --workspaces --if-present",

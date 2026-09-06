@@ -1,0 +1,6 @@
+{
+  "name": "Business Admin Template",
+  "description": "Business administration template with modular architecture for sales, catalog, metrics, financials, and customer management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

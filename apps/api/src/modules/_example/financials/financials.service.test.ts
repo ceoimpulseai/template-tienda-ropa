@@ -191,7 +191,7 @@ describe('financialsService.productMargins', () => {
 
   it('handles products with no purchases', async () => {
     const business = await Business.create({ id: randomUUID(), name: 'No Purchases' });
-    const item = await Item.create({
+    await Item.create({
       id: randomUUID(),
       businessId: business.id,
       name: 'Item X',

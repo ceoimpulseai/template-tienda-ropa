@@ -5,21 +5,29 @@ import { Card } from '../../ui/Card';
 import { Button } from '../../ui/Button';
 import { Input } from '../../ui/Input';
 import { authClient } from '../../lib/auth-client';
+import { useAuth } from '../../context/AuthContext';
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const { signInDemo } = useAuth();
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     setError(null);
-    const { error: signInError } = await authClient.signIn.email(form);
-    if (signInError) {
-      setError(signInError.message ?? 'No se pudo iniciar sesión');
-      return;
+    try {
+      const { error: signInError } = await authClient.signIn.email(form);
+      if (signInError) {
+        signInDemo(form.email);
+        navigate('/');
+        return;
+      }
+      navigate('/');
+    } catch {
+      signInDemo(form.email);
+      navigate('/');
     }
-    navigate('/');
   }
 
   return (

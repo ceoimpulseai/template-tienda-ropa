@@ -5,6 +5,7 @@ import { Button } from '../../ui/Button';
 import { Input } from '../../ui/Input';
 import { Table } from '../../ui/Table';
 import { Modal } from '../../ui/Modal';
+import { PageHeader } from '../../components/PageHeader';
 import { useApi } from '../../lib/useApi';
 import { apiFetch } from '../../lib/apiFetch';
 import type { Supplier } from '@template/shared';
@@ -60,13 +61,18 @@ export function SuppliersPage() {
   }
 
   return (
-    <Card>
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-text">Proveedores</h2>
-        <Button type="button" onClick={openCreate}>
-          Nuevo proveedor
-        </Button>
-      </div>
+    <div>
+      <PageHeader
+        title="Proveedores"
+        description="Gestión de proveedores, información de contacto y condiciones comerciales."
+        action={
+          <Button type="button" onClick={openCreate}>
+            Nuevo proveedor
+          </Button>
+        }
+      />
+
+      <Card>
 
       {loading ? (
         <p className="text-text-muted">Cargando…</p>
@@ -134,5 +140,6 @@ export function SuppliersPage() {
         </form>
       </Modal>
     </Card>
+    </div>
   );
 }

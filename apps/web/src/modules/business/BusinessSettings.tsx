@@ -4,6 +4,7 @@ import { Card } from '../../ui/Card';
 import { Button } from '../../ui/Button';
 import { Input } from '../../ui/Input';
 import { Modal } from '../../ui/Modal';
+import { PageHeader } from '../../components/PageHeader';
 import { useApi } from '../../lib/useApi';
 import { apiFetch } from '../../lib/apiFetch';
 import type { Business } from '@template/shared';
@@ -51,14 +52,22 @@ export function BusinessSettings() {
     refetch();
   }
 
-  if (loading) return <p className="text-text-muted">Cargando…</p>;
-
   return (
-    <Card>
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-text">Información del negocio</h2>
-        <Button type="button" onClick={() => setModalOpen(true)}>Editar</Button>
-      </div>
+    <div>
+      <PageHeader
+        title="Negocio"
+        description="Parámetros generales de tu empresa, moneda y enlace al catálogo público."
+        action={
+          <Button type="button" onClick={() => setModalOpen(true)}>
+            Editar
+          </Button>
+        }
+      />
+
+      {loading ? (
+        <p className="text-text-muted">Cargando…</p>
+      ) : (
+        <Card>
 
       {business && (
         <div className="flex items-center gap-2 text-xs text-text-muted">
@@ -105,5 +114,7 @@ export function BusinessSettings() {
         </form>
       </Modal>
     </Card>
+      )}
+    </div>
   );
 }

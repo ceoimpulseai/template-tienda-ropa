@@ -29,7 +29,7 @@ export function Button({ variant = 'primary', size = 'md', className = '', type 
   return (
     <button
       type={type}
-      className={`inline-flex items-center justify-center gap-2 rounded font-medium transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 outline-none ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 rounded font-medium cursor-pointer transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 outline-none ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
       {...props}
     />
   );

@@ -93,6 +93,27 @@ body {
   font-feature-settings: 'cv11', 'ss01';  /* SF Pro alternate characters */
 }
 
+/* Ensure cursor pointer on all buttons, links, and clickable controls */
+button,
+[role="button"],
+a,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+select,
+summary {
+  cursor: pointer;
+}
+
+button:disabled,
+[role="button"][aria-disabled="true"],
+input[type="button"]:disabled,
+input[type="submit"]:disabled,
+input[type="reset"]:disabled,
+select:disabled {
+  cursor: not-allowed;
+}
+
 /* Editorial typography helpers */
 .font-serif {
   font-family: var(--font-serif);

@@ -7,6 +7,7 @@ import { Input } from '../../../ui/Input';
 import { Table } from '../../../ui/Table';
 import { Badge } from '../../../ui/Badge';
 import { Modal } from '../../../ui/Modal';
+import { PageHeader } from '../../../components/PageHeader';
 import { useApi } from '../../../lib/useApi';
 import { apiFetch } from '../../../lib/apiFetch';
 import type { Cost, CostType } from '@template/shared';
@@ -38,13 +39,19 @@ export function CostsPage() {
   }
 
   return (
-    <Card>
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-text">Gastos fijos y variables</h2>
-        <Button type="button" onClick={openCreate}>Nuevo gasto</Button>
-      </div>
+    <div>
+      <PageHeader
+        title="Gastos"
+        description="Control y seguimiento de costos fijos, variables y extraordinarios."
+        action={
+          <Button type="button" onClick={openCreate}>
+            Nuevo gasto
+          </Button>
+        }
+      />
 
-      {loading ? (
+      <Card>
+        {loading ? (
         <p className="text-text-muted">Cargando…</p>
       ) : (
         <Table<Cost>
@@ -104,5 +111,6 @@ export function CostsPage() {
         </form>
       </Modal>
     </Card>
+    </div>
   );
 }

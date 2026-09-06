@@ -1,7 +1,7 @@
 // EJEMPLO: adaptar a la lógica del rubro concreto.
 import { useSearchParams } from 'react-router-dom';
 import { Tabs } from '../../../ui/Tabs';
-import { Container } from '../../../ui/Container';
+import { PageHeader } from '../../../components/PageHeader';
 import { IncomeStatementTab } from './IncomeStatementTab';
 import { BreakEvenTab } from './BreakEvenTab';
 import { ProductMarginsTab } from './ProductMarginsTab';
@@ -23,8 +23,11 @@ export function FinancialsPage() {
   };
 
   return (
-    <Container>
-      <h1 className="mb-6 text-2xl font-semibold text-text">Financiero</h1>
+    <div>
+      <PageHeader
+        title="Financiero"
+        description="Estado de resultados, punto de equilibrio y análisis de márgenes."
+      />
       <Tabs tabs={TABS} activeTab={activeTab} onTabChange={handleTabChange} />
       <div className="mt-6">
         {activeTab === 'income-statement' && <IncomeStatementTab />}
@@ -32,6 +35,6 @@ export function FinancialsPage() {
         {activeTab === 'product-margins' && <ProductMarginsTab />}
         {activeTab === 'ratios' && <RatiosTab />}
       </div>
-    </Container>
+    </div>
   );
 }

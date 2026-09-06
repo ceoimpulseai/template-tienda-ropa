@@ -6,6 +6,7 @@ import { Button } from '../../../ui/Button';
 import { Input } from '../../../ui/Input';
 import { Table } from '../../../ui/Table';
 import { Modal } from '../../../ui/Modal';
+import { PageHeader } from '../../../components/PageHeader';
 import { useApi } from '../../../lib/useApi';
 import { apiFetch } from '../../../lib/apiFetch';
 import type { Item, Purchase, Supplier } from '@template/shared';
@@ -40,13 +41,19 @@ export function PurchasesPage() {
   }
 
   return (
-    <Card>
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-text">Compras</h2>
-        <Button type="button" onClick={openCreate}>Nueva compra</Button>
-      </div>
+    <div>
+      <PageHeader
+        title="Compras"
+        description="Registro y control de compras de mercadería e insumos a proveedores."
+        action={
+          <Button type="button" onClick={openCreate}>
+            Nueva compra
+          </Button>
+        }
+      />
 
-      {loading ? (
+      <Card>
+        {loading ? (
         <p className="text-text-muted">Cargando…</p>
       ) : (
         <Table<Purchase>
@@ -109,5 +116,6 @@ export function PurchasesPage() {
         </form>
       </Modal>
     </Card>
+    </div>
   );
 }

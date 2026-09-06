@@ -8,6 +8,7 @@ import { Checkbox } from '../../../ui/Checkbox';
 import { Table } from '../../../ui/Table';
 import { Badge } from '../../../ui/Badge';
 import { Modal } from '../../../ui/Modal';
+import { PageHeader } from '../../../components/PageHeader';
 import { useApi } from '../../../lib/useApi';
 import { apiFetch } from '../../../lib/apiFetch';
 import type { Item, Sale } from '@template/shared';
@@ -46,13 +47,19 @@ export function SalesPage() {
   }
 
   return (
-    <Card>
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-text">Ventas</h2>
-        <Button type="button" onClick={openCreate}>Nueva venta</Button>
-      </div>
+    <div>
+      <PageHeader
+        title="Ventas"
+        description="Historial y registro de ventas cobradas e internas de tu comercio."
+        action={
+          <Button type="button" onClick={openCreate}>
+            Nueva venta
+          </Button>
+        }
+      />
 
-      {loading ? (
+      <Card>
+        {loading ? (
         <p className="text-text-muted">Cargando…</p>
       ) : (
         <Table<Sale>
@@ -133,5 +140,6 @@ export function SalesPage() {
         </form>
       </Modal>
     </Card>
+    </div>
   );
 }

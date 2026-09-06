@@ -6,6 +6,7 @@ import { Input } from '../../ui/Input';
 import { Checkbox } from '../../ui/Checkbox';
 import { Table } from '../../ui/Table';
 import { Modal } from '../../ui/Modal';
+import { PageHeader } from '../../components/PageHeader';
 import { useApi } from '../../lib/useApi';
 import { apiFetch } from '../../lib/apiFetch';
 import { businessConfig } from '../../config/business.config';
@@ -40,13 +41,19 @@ export function ItemsPage() {
   }
 
   return (
-    <Card>
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-text">{businessConfig.terminology.itemPlural}</h2>
-        <Button type="button" onClick={openCreate}>Nuevo {businessConfig.terminology.item}</Button>
-      </div>
+    <div>
+      <PageHeader
+        title={businessConfig.terminology.itemPlural}
+        description="Administra el catálogo de artículos, precios y disponibilidad en la tienda."
+        action={
+          <Button type="button" onClick={openCreate}>
+            Nuevo {businessConfig.terminology.item}
+          </Button>
+        }
+      />
 
-      {error && <p className="mb-4 text-sm text-danger">{error}</p>}
+      <Card>
+        {error && <p className="mb-4 text-sm text-danger">{error}</p>}
 
       {loading ? (
         <p className="text-text-muted">Cargando…</p>
@@ -101,5 +108,6 @@ export function ItemsPage() {
         </form>
       </Modal>
     </Card>
+    </div>
   );
 }
