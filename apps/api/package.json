@@ -12,6 +12,7 @@
     "start": "node dist/server.js",
     "migrate": "tsx src/db/migrate.ts up",
     "migrate:auth": "better-auth migrate --config src/config/auth.ts -y",
+    "seed": "tsx src/seed/index.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },

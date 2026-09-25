@@ -14,7 +14,8 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "vitest run",
     "migrate": "npm run migrate -w apps/api",
-    "migrate:auth": "npm run migrate:auth -w apps/api"
+    "migrate:auth": "npm run migrate:auth -w apps/api",
+    "seed": "npm run seed -w apps/api"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",

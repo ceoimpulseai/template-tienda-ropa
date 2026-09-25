@@ -39,7 +39,7 @@ Brevo, SES, etc.).
 `account`, `verification`) vía un pool Postgres separado y necesita su propio comando
 de migración — sin correrlo, el registro/login falla con `relation "user" does not exist`.
 
-`apps/web` corre en `http://localhost:5173` y proxea `/api` hacia `apps/api`
+`apps/web` corre en `http://localhost:3000` y proxea `/api` hacia `apps/api`
 (`http://localhost:4000`). Copiá `apps/api/.env.example` a `apps/api/.env` antes de
 levantar el server.
 
