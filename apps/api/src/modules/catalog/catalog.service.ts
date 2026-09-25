@@ -1,14 +1,14 @@
 import { Op } from 'sequelize';
 import { Business } from '../business/business.model.js';
-import { Item } from '../items/item.model.js';
+import { itemRepository } from '../items/item.repository.js';
 
 export const catalogService = {
   async getById(businessId: string) {
     const business = await Business.findByPk(businessId);
     if (!business) return null;
 
-    const items = await Item.findAll({
-      where: { businessId: business.id, visibleInCatalog: true, stock: { [Op.gt]: 0 } },
+    const items = await itemRepository.findAll(businessId, {
+      where: { visibleInCatalog: true, stock: { [Op.gt]: 0 } },
       order: [['name', 'ASC']],
     });
 

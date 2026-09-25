@@ -1,6 +1,13 @@
 import { Sequelize } from 'sequelize';
 import { env, isTest } from './env.js';
 
+const postgresPool = {
+  max: 20,
+  min: 2,
+  acquire: 30000,
+  idle: 10000,
+};
+
 function createSequelize(): Sequelize {
   if (isTest) {
     return new Sequelize({ dialect: 'sqlite', storage: ':memory:', logging: false });
@@ -14,7 +21,7 @@ function createSequelize(): Sequelize {
   }
 
   if (env.DATABASE_URL) {
-    return new Sequelize(env.DATABASE_URL, { dialect: 'postgres', logging: false });
+    return new Sequelize(env.DATABASE_URL, { dialect: 'postgres', logging: false, pool: postgresPool });
   }
 
   return new Sequelize(env.DB_NAME!, env.DB_USER!, env.DB_PASSWORD, {
@@ -22,6 +29,7 @@ function createSequelize(): Sequelize {
     port: env.DB_PORT ?? 5432,
     dialect: 'postgres',
     logging: false,
+    pool: postgresPool,
   });
 }
 

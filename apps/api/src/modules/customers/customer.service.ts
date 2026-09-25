@@ -1,26 +1,20 @@
-import { randomUUID } from 'node:crypto';
-import { NotFoundError } from '../../lib/errors.js';
-import { Customer } from './customer.model.js';
+import { customerRepository } from './customer.repository.js';
 import type { CreateCustomerInput } from '@template/shared';
 
 export const customerService = {
   async list(businessId: string) {
-    return Customer.findAll({ where: { businessId }, order: [['name', 'ASC']] });
+    return customerRepository.findAll(businessId, { order: [['name', 'ASC']] });
   },
 
   async create(businessId: string, input: CreateCustomerInput) {
-    return Customer.create({
-      id: randomUUID(),
-      businessId,
-      name: input.name,
+    return customerRepository.create(businessId, {
+      ...input,
       email: input.email ?? null,
       phone: input.phone ?? null,
     });
   },
 
   async remove(businessId: string, customerId: string) {
-    const customer = await Customer.findOne({ where: { id: customerId, businessId } });
-    if (!customer) throw new NotFoundError('CUSTOMER_NOT_FOUND');
-    await customer.destroy();
+    await customerRepository.remove(businessId, customerId);
   },
 };

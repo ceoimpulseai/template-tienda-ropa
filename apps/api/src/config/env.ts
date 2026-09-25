@@ -18,6 +18,7 @@ const envSchema = z.object({
   SMTP_USER: z.string().optional(),
   SMTP_PASSWORD: z.string().optional(),
   SMTP_FROM: z.string().default('no-reply@template.local'),
+  TEST_AUTH_HEADER_ENABLED: z.coerce.boolean().default(false),
 }).superRefine((data, ctx) => {
   if (data.NODE_ENV === 'production' && data.BETTER_AUTH_SECRET === 'dev-secret-change-me') {
     ctx.addIssue({

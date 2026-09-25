@@ -1,21 +1,23 @@
-import { randomUUID } from 'node:crypto';
-import { ConflictError, NotFoundError } from '../../lib/errors.js';
-import { Branch } from './branch.model.js';
+import { ConflictError } from '../../lib/errors.js';
+import { branchRepository } from './branch.repository.js';
+import { branchCache, makeBranchCacheKey } from '../../lib/tenantCache.js';
 import type { CreateBranchInput } from '@template/shared';
 
 export const branchService = {
   async list(businessId: string) {
-    return Branch.findAll({ where: { businessId } });
+    return branchRepository.findAll(businessId);
   },
 
   async create(businessId: string, input: CreateBranchInput) {
-    return Branch.create({ id: randomUUID(), businessId, name: input.name, isDefault: false });
+    branchCache.delete(makeBranchCacheKey(businessId, 'default'));
+    return branchRepository.create(businessId, { name: input.name, isDefault: false });
   },
 
   async remove(businessId: string, branchId: string) {
-    const branch = await Branch.findOne({ where: { id: branchId, businessId } });
-    if (!branch) throw new NotFoundError('BRANCH_NOT_FOUND');
+    const branch = await branchRepository.findById(businessId, branchId);
     if (branch.isDefault) throw new ConflictError('CANNOT_DELETE_DEFAULT_BRANCH');
+    branchCache.delete(makeBranchCacheKey(businessId, branchId));
+    branchCache.delete(makeBranchCacheKey(businessId, 'default'));
     await branch.destroy();
   },
 };

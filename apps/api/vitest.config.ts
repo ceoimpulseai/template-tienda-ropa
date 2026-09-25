@@ -5,6 +5,6 @@ export default defineConfig({
     name: 'api',
     environment: 'node',
     include: ['src/**/*.test.ts'],
-    env: { NODE_ENV: 'test' },
+    env: { NODE_ENV: 'test', TEST_AUTH_HEADER_ENABLED: 'true' },
   },
 });

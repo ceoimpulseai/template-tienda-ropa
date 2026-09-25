@@ -1,26 +1,22 @@
 // EJEMPLO: adaptar a la lógica del rubro concreto.
-import { randomUUID } from 'node:crypto';
-import { NotFoundError } from '../../../lib/errors.js';
-import { Cost } from './cost.model.js';
+import { costRepository } from './cost.repository.js';
 import type { CreateCostInput } from '@template/shared';
 
 export const costService = {
   async list(businessId: string) {
-    return Cost.findAll({ where: { businessId } });
+    return costRepository.findAll(businessId);
   },
 
   async create(businessId: string, input: CreateCostInput) {
-    return Cost.create({ id: randomUUID(), businessId, ...input });
+    return costRepository.create(businessId, input);
   },
 
   async remove(businessId: string, costId: string) {
-    const cost = await Cost.findOne({ where: { id: costId, businessId } });
-    if (!cost) throw new NotFoundError('COST_NOT_FOUND');
-    await cost.destroy();
+    await costRepository.remove(businessId, costId);
   },
 
   async totalFixed(businessId: string) {
-    const costs = await Cost.findAll({ where: { businessId, type: 'fixed' } });
+    const costs = await costRepository.findAll(businessId, { where: { type: 'fixed' } });
     return costs.reduce((sum, cost) => sum + cost.amount, 0);
   },
 };
