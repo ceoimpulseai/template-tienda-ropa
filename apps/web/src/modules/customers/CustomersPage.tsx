@@ -9,6 +9,7 @@ import { PageHeader } from '../../components/PageHeader';
 import { useApi } from '../../lib/useApi';
 import { apiFetch } from '../../lib/apiFetch';
 import type { Customer } from '@template/shared';
+import { Can } from '../../components/Can';
 
 export function CustomersPage() {
   const { data, loading, refetch } = useApi<Customer[]>('/customers');
@@ -38,9 +39,11 @@ export function CustomersPage() {
         title="Clientes"
         description="Directorio de clientes y registro de datos de contacto para tus ventas."
         action={
-          <Button type="button" onClick={openCreate}>
-            Nuevo cliente
-          </Button>
+          <Can permission="customers:create">
+            <Button type="button" onClick={openCreate}>
+              Nuevo cliente
+            </Button>
+          </Can>
         }
       />
 
@@ -56,9 +59,11 @@ export function CustomersPage() {
             {
               header: '',
               render: (c) => (
-                <Button variant="danger" onClick={() => handleRemove(c.id)}>
-                  Quitar
-                </Button>
+                <Can permission="customers:delete">
+                  <Button variant="danger" onClick={() => handleRemove(c.id)}>
+                    Quitar
+                  </Button>
+                </Can>
               ),
             },
           ]}
@@ -67,31 +72,33 @@ export function CustomersPage() {
         />
       )}
 
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Nuevo cliente">
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <Input
-            placeholder="Nombre"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-            required
-          />
-          <Input
-            type="email"
-            placeholder="Email (opcional)"
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-          />
-          <Input
-            placeholder="Teléfono (opcional)"
-            value={form.phone}
-            onChange={(e) => setForm({ ...form, phone: e.target.value })}
-          />
-          <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>Cancelar</Button>
-            <Button type="submit">Agregar</Button>
-          </div>
-        </form>
-      </Modal>
+      <Can permission="customers:create">
+        <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Nuevo cliente">
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <Input
+              placeholder="Nombre"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              required
+            />
+            <Input
+              type="email"
+              placeholder="Email (opcional)"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+            />
+            <Input
+              placeholder="Teléfono (opcional)"
+              value={form.phone}
+              onChange={(e) => setForm({ ...form, phone: e.target.value })}
+            />
+            <div className="flex justify-end gap-2 pt-2">
+              <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>Cancelar</Button>
+              <Button type="submit">Agregar</Button>
+            </div>
+          </form>
+        </Modal>
+      </Can>
     </Card>
     </div>
   );

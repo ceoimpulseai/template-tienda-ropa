@@ -10,6 +10,7 @@ import { PageHeader } from '../../../components/PageHeader';
 import { useApi } from '../../../lib/useApi';
 import { apiFetch } from '../../../lib/apiFetch';
 import type { Item, Purchase, Supplier } from '@template/shared';
+import { Can } from '../../../components/Can';
 
 export function PurchasesPage() {
   const { data: purchases, loading, refetch } = useApi<Purchase[]>('/purchases');
@@ -46,9 +47,11 @@ export function PurchasesPage() {
         title="Compras"
         description="Registro y control de compras de mercadería e insumos a proveedores."
         action={
-          <Button type="button" onClick={openCreate}>
-            Nueva compra
-          </Button>
+          <Can permission="purchases:create">
+            <Button type="button" onClick={openCreate}>
+              Nueva compra
+            </Button>
+          </Can>
         }
       />
 
@@ -68,53 +71,55 @@ export function PurchasesPage() {
         />
       )}
 
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Nueva compra">
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <select
-            value={form.itemId}
-            onChange={(e) => setForm({ ...form, itemId: e.target.value })}
-            required
-            className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm text-text"
-          >
-            <option value="">Seleccionar producto</option>
-            {(items ?? []).map((i) => (
-              <option key={i.id} value={i.id}>
-                {i.name} — ${i.price}
-              </option>
-            ))}
-          </select>
-          <Input
-            type="number"
-            placeholder="Cantidad"
-            value={form.quantity}
-            onChange={(e) => setForm({ ...form, quantity: Number(e.target.value) })}
-            required
-          />
-          <Input
-            type="number"
-            placeholder="Costo unitario"
-            value={form.unitCost}
-            onChange={(e) => setForm({ ...form, unitCost: Number(e.target.value) })}
-            required
-          />
-          <select
-            value={form.supplierId}
-            onChange={(e) => setForm({ ...form, supplierId: e.target.value })}
-            className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm text-text"
-          >
-            <option value="">Sin proveedor</option>
-            {(suppliers ?? []).map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </select>
-          <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>Cancelar</Button>
-            <Button type="submit">Registrar compra</Button>
-          </div>
-        </form>
-      </Modal>
+      <Can permission="purchases:create">
+        <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Nueva compra">
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <select
+              value={form.itemId}
+              onChange={(e) => setForm({ ...form, itemId: e.target.value })}
+              required
+              className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm text-text"
+            >
+              <option value="">Seleccionar producto</option>
+              {(items ?? []).map((i) => (
+                <option key={i.id} value={i.id}>
+                  {i.name} — ${i.price}
+                </option>
+              ))}
+            </select>
+            <Input
+              type="number"
+              placeholder="Cantidad"
+              value={form.quantity}
+              onChange={(e) => setForm({ ...form, quantity: Number(e.target.value) })}
+              required
+            />
+            <Input
+              type="number"
+              placeholder="Costo unitario"
+              value={form.unitCost}
+              onChange={(e) => setForm({ ...form, unitCost: Number(e.target.value) })}
+              required
+            />
+            <select
+              value={form.supplierId}
+              onChange={(e) => setForm({ ...form, supplierId: e.target.value })}
+              className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm text-text"
+            >
+              <option value="">Sin proveedor</option>
+              {(suppliers ?? []).map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>Cancelar</Button>
+              <Button type="submit">Registrar compra</Button>
+            </div>
+          </form>
+        </Modal>
+      </Can>
     </Card>
     </div>
   );

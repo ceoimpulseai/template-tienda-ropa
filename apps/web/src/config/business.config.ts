@@ -3,6 +3,8 @@
 //
 // Para cambiar la PALETA DE COLORES del cliente, editá `src/theme/palette.css`.
 // Para cambiar terminología, módulos habilitados, o nav, editá este archivo.
+import type { Permission } from '@template/shared';
+
 export interface NavEntry {
   to: string;
   label: string;
@@ -10,6 +12,9 @@ export interface NavEntry {
   // en App.tsx) contra el flag correspondiente en enabledModules. Ausente = siempre
   // visible (módulos genéricos: customers, team, business, branches).
   moduleKey?: keyof BusinessConfig['enabledModules'];
+  // Permiso requerido para ver esta entrada de navegación. Si no tiene permiso,
+  // la entrada no se renderiza en el sidebar.
+  permission?: Permission;
 }
 
 export interface BusinessConfig {
@@ -48,17 +53,17 @@ const enabledModules = {
 };
 
 const nav: NavEntry[] = [
-  { to: '/', label: 'Métricas', moduleKey: 'metrics' },
-  { to: '/items', label: terminology.itemPlural },
-  { to: '/purchases', label: 'Compras', moduleKey: 'purchases' },
-  { to: '/sales', label: 'Ventas', moduleKey: 'sales' },
-  { to: '/costs', label: 'Gastos', moduleKey: 'costs' },
-  { to: '/financials', label: 'Financiero', moduleKey: 'financials' },
-  { to: '/suppliers', label: 'Proveedores' },
-  { to: '/customers', label: 'Clientes' },
-  { to: '/team', label: 'Equipo' },
-  { to: '/business', label: 'Negocio' },
-  { to: '/branches', label: terminology.branchPlural },
+  { to: '/', label: 'Métricas', moduleKey: 'metrics', permission: 'metrics:read' },
+  { to: '/items', label: terminology.itemPlural, permission: 'items:read' },
+  { to: '/purchases', label: 'Compras', moduleKey: 'purchases', permission: 'purchases:read' },
+  { to: '/sales', label: 'Ventas', moduleKey: 'sales', permission: 'sales:read' },
+  { to: '/costs', label: 'Gastos', moduleKey: 'costs', permission: 'costs:read' },
+  { to: '/financials', label: 'Financiero', moduleKey: 'financials', permission: 'financials:read' },
+  { to: '/suppliers', label: 'Proveedores', permission: 'suppliers:read' },
+  { to: '/customers', label: 'Clientes', permission: 'customers:read' },
+  { to: '/team', label: 'Equipo', permission: 'team:read' },
+  { to: '/business', label: 'Negocio', permission: 'business:read' },
+  { to: '/branches', label: terminology.branchPlural, permission: 'branches:read' },
 ];
 
 export const businessConfig: BusinessConfig = {

@@ -5,7 +5,9 @@ import { updateBusinessSchema } from '@template/shared';
 export const businessController = {
   async getCurrent(req: Request, res: Response, next: NextFunction) {
     try {
-      res.json(await businessService.getById(req.auth!.businessId!));
+      const business = await businessService.getById(req.auth!.businessId!);
+      const permissions = businessService.getPermissionsForRole(req.auth!.role!);
+      res.json({ ...business?.toJSON(), permissions });
     } catch (err) {
       next(err);
     }

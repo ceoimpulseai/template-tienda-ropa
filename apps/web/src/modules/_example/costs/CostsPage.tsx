@@ -11,6 +11,7 @@ import { PageHeader } from '../../../components/PageHeader';
 import { useApi } from '../../../lib/useApi';
 import { apiFetch } from '../../../lib/apiFetch';
 import type { Cost, CostType } from '@template/shared';
+import { Can } from '../../../components/Can';
 
 export function CostsPage() {
   const { data, loading, refetch } = useApi<Cost[]>('/costs');
@@ -44,9 +45,11 @@ export function CostsPage() {
         title="Gastos"
         description="Control y seguimiento de costos fijos, variables y extraordinarios."
         action={
-          <Button type="button" onClick={openCreate}>
-            Nuevo gasto
-          </Button>
+          <Can permission="costs:create">
+            <Button type="button" onClick={openCreate}>
+              Nuevo gasto
+            </Button>
+          </Can>
         }
       />
 
@@ -69,9 +72,11 @@ export function CostsPage() {
             {
               header: '',
               render: (c) => (
-                <button onClick={() => handleRemove(c.id)} className="text-danger">
-                  Quitar
-                </button>
+                <Can permission="costs:delete">
+                  <button onClick={() => handleRemove(c.id)} className="text-danger">
+                    Quitar
+                  </button>
+                </Can>
               ),
             },
           ]}
@@ -80,36 +85,38 @@ export function CostsPage() {
         />
       )}
 
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Nuevo gasto">
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <select
-            value={form.type}
-            onChange={(e) => setForm({ ...form, type: e.target.value as CostType })}
-            className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm text-text"
-          >
-            <option value="fixed">Fijo</option>
-            <option value="variable">Variable</option>
-            <option value="extraordinary">Extraordinario</option>
-          </select>
-          <Input
-            placeholder="Concepto"
-            value={form.label}
-            onChange={(e) => setForm({ ...form, label: e.target.value })}
-            required
-          />
-          <Input
-            type="number"
-            placeholder="Monto"
-            value={form.amount}
-            onChange={(e) => setForm({ ...form, amount: Number(e.target.value) })}
-            required
-          />
-          <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>Cancelar</Button>
-            <Button type="submit">Agregar</Button>
-          </div>
-        </form>
-      </Modal>
+      <Can permission="costs:create">
+        <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Nuevo gasto">
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <select
+              value={form.type}
+              onChange={(e) => setForm({ ...form, type: e.target.value as CostType })}
+              className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm text-text"
+            >
+              <option value="fixed">Fijo</option>
+              <option value="variable">Variable</option>
+              <option value="extraordinary">Extraordinario</option>
+            </select>
+            <Input
+              placeholder="Concepto"
+              value={form.label}
+              onChange={(e) => setForm({ ...form, label: e.target.value })}
+              required
+            />
+            <Input
+              type="number"
+              placeholder="Monto"
+              value={form.amount}
+              onChange={(e) => setForm({ ...form, amount: Number(e.target.value) })}
+              required
+            />
+            <div className="flex justify-end gap-2 pt-2">
+              <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>Cancelar</Button>
+              <Button type="submit">Agregar</Button>
+            </div>
+          </form>
+        </Modal>
+      </Can>
     </Card>
     </div>
   );

@@ -13,7 +13,6 @@ export const teamController = {
 
   async invite(req: Request, res: Response, next: NextFunction) {
     try {
-      if (req.auth!.role !== 'admin') return res.status(403).json({ error: 'FORBIDDEN' });
       const input = inviteMemberSchema.parse(req.body);
       const member = await teamService.invite(req.auth!.businessId!, input);
       res.status(201).json(member);
@@ -24,7 +23,6 @@ export const teamController = {
 
   async remove(req: Request, res: Response, next: NextFunction) {
     try {
-      if (req.auth!.role !== 'admin') return res.status(403).json({ error: 'FORBIDDEN' });
       await teamService.remove(req.auth!.businessId!, req.params.id!);
       res.status(204).end();
     } catch (err) {

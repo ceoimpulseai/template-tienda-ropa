@@ -2,9 +2,10 @@
 import { Router } from 'express';
 import { requireAuth } from '../../../middleware/requireAuth.js';
 import { requireBusiness } from '../../../middleware/requireBusiness.js';
+import { requirePermission } from '../../../middleware/requirePermission.js';
 import { metricsController } from './metrics.controller.js';
 
 export const metricsRoutes = Router();
 
 metricsRoutes.use(requireAuth, requireBusiness);
-metricsRoutes.get('/dashboard', metricsController.dashboard);
+metricsRoutes.get('/dashboard', requirePermission('metrics:read'), metricsController.dashboard);

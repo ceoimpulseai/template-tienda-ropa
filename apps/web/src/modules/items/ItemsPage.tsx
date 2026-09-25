@@ -11,6 +11,7 @@ import { useApi } from '../../lib/useApi';
 import { apiFetch } from '../../lib/apiFetch';
 import { businessConfig } from '../../config/business.config';
 import type { Item } from '@template/shared';
+import { Can } from '../../components/Can';
 
 export function ItemsPage() {
   const { data, loading, error, refetch } = useApi<Item[]>('/items');
@@ -46,9 +47,11 @@ export function ItemsPage() {
         title={businessConfig.terminology.itemPlural}
         description="Administra el catálogo de artículos, precios y disponibilidad en la tienda."
         action={
-          <Button type="button" onClick={openCreate}>
-            Nuevo {businessConfig.terminology.item}
-          </Button>
+          <Can permission="items:create">
+            <Button type="button" onClick={openCreate}>
+              Nuevo {businessConfig.terminology.item}
+            </Button>
+          </Can>
         }
       />
 
@@ -66,11 +69,13 @@ export function ItemsPage() {
             {
               header: 'Visible en catálogo público',
               render: (i) => (
-                <Checkbox
-                  aria-label={`Visible en catálogo público: ${i.name}`}
-                  checked={i.visibleInCatalog}
-                  onChange={() => handleToggleVisible(i)}
-                />
+                <Can permission="items:update">
+                  <Checkbox
+                    aria-label={`Visible en catálogo público: ${i.name}`}
+                    checked={i.visibleInCatalog}
+                    onChange={() => handleToggleVisible(i)}
+                  />
+                </Can>
               ),
             },
           ]}
@@ -79,34 +84,36 @@ export function ItemsPage() {
         />
       )}
 
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={`Nuevo ${businessConfig.terminology.item}`}>
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <Input
-            placeholder="Nombre"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-            required
-          />
-          <Input
-            type="number"
-            placeholder="Precio"
-            value={form.price}
-            onChange={(e) => setForm({ ...form, price: e.target.value })}
-            required
-          />
-          <Input
-            type="number"
-            placeholder="Stock"
-            value={form.stock}
-            onChange={(e) => setForm({ ...form, stock: e.target.value })}
-            required
-          />
-          <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>Cancelar</Button>
-            <Button type="submit">Agregar</Button>
-          </div>
-        </form>
-      </Modal>
+      <Can permission="items:create">
+        <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={`Nuevo ${businessConfig.terminology.item}`}>
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <Input
+              placeholder="Nombre"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              required
+            />
+            <Input
+              type="number"
+              placeholder="Precio"
+              value={form.price}
+              onChange={(e) => setForm({ ...form, price: e.target.value })}
+              required
+            />
+            <Input
+              type="number"
+              placeholder="Stock"
+              value={form.stock}
+              onChange={(e) => setForm({ ...form, stock: e.target.value })}
+              required
+            />
+            <div className="flex justify-end gap-2 pt-2">
+              <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>Cancelar</Button>
+              <Button type="submit">Agregar</Button>
+            </div>
+          </form>
+        </Modal>
+      </Can>
     </Card>
     </div>
   );

@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 import { businessConfig, type NavEntry } from '../config/business.config';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/ThemeContext';
+import { useCan } from '../hooks/useCan';
 import {
   SidebarToggleIcon,
   BarChartIcon,
@@ -57,7 +58,9 @@ function getNavIcon(entry: NavEntry) {
 
 export function Sidebar() {
   const { data: session, signOut } = useAuth();
+  const { permissions } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const can = useCan();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(() => {
     return localStorage.getItem('sidebar_collapsed') === 'true';
@@ -103,7 +106,9 @@ export function Sidebar() {
     .toUpperCase() || 'IA';
 
   const activeNavLinks = businessConfig.nav.filter(
-    (link) => !link.moduleKey || businessConfig.enabledModules[link.moduleKey],
+    (link) =>
+      (!link.moduleKey || businessConfig.enabledModules[link.moduleKey]) &&
+      (!link.permission || can(link.permission)),
   );
 
   return (

@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from './theme/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { RequirePermission } from './components/RequirePermission';
 import { Layout } from './components/Layout';
 import { businessConfig } from './config/business.config';
 import { LoginPage } from './modules/auth/LoginPage';
@@ -36,21 +37,49 @@ export function App() {
             )}
             <Route element={<ProtectedRoute />}>
               <Route element={<Layout />}>
-                {businessConfig.enabledModules.metrics && <Route path="/" element={<MetricsPage />} />}
+                {businessConfig.enabledModules.metrics && (
+                  <Route element={<RequirePermission permission="metrics:read" />}>
+                    <Route path="/" element={<MetricsPage />} />
+                  </Route>
+                )}
                 {businessConfig.enabledModules.purchases && (
-                  <Route path="/purchases" element={<PurchasesPage />} />
+                  <Route element={<RequirePermission permission="purchases:read" />}>
+                    <Route path="/purchases" element={<PurchasesPage />} />
+                  </Route>
                 )}
-                {businessConfig.enabledModules.sales && <Route path="/sales" element={<SalesPage />} />}
-                {businessConfig.enabledModules.costs && <Route path="/costs" element={<CostsPage />} />}
+                {businessConfig.enabledModules.sales && (
+                  <Route element={<RequirePermission permission="sales:read" />}>
+                    <Route path="/sales" element={<SalesPage />} />
+                  </Route>
+                )}
+                {businessConfig.enabledModules.costs && (
+                  <Route element={<RequirePermission permission="costs:read" />}>
+                    <Route path="/costs" element={<CostsPage />} />
+                  </Route>
+                )}
                 {businessConfig.enabledModules.financials && (
-                  <Route path="/financials" element={<FinancialsPage />} />
+                  <Route element={<RequirePermission permission="financials:read" />}>
+                    <Route path="/financials" element={<FinancialsPage />} />
+                  </Route>
                 )}
-                <Route path="/customers" element={<CustomersPage />} />
-                <Route path="/items" element={<ItemsPage />} />
-                <Route path="/suppliers" element={<SuppliersPage />} />
-                <Route path="/team" element={<TeamSettings />} />
-                <Route path="/business" element={<BusinessSettings />} />
-                <Route path="/branches" element={<BranchesSettings />} />
+                <Route element={<RequirePermission permission="customers:read" />}>
+                  <Route path="/customers" element={<CustomersPage />} />
+                </Route>
+                <Route element={<RequirePermission permission="items:read" />}>
+                  <Route path="/items" element={<ItemsPage />} />
+                </Route>
+                <Route element={<RequirePermission permission="suppliers:read" />}>
+                  <Route path="/suppliers" element={<SuppliersPage />} />
+                </Route>
+                <Route element={<RequirePermission permission="team:read" />}>
+                  <Route path="/team" element={<TeamSettings />} />
+                </Route>
+                <Route element={<RequirePermission permission="business:read" />}>
+                  <Route path="/business" element={<BusinessSettings />} />
+                </Route>
+                <Route element={<RequirePermission permission="branches:read" />}>
+                  <Route path="/branches" element={<BranchesSettings />} />
+                </Route>
               </Route>
             </Route>
           </Routes>

@@ -9,6 +9,7 @@ import { PageHeader } from '../../components/PageHeader';
 import { useApi } from '../../lib/useApi';
 import { apiFetch } from '../../lib/apiFetch';
 import type { Supplier } from '@template/shared';
+import { Can } from '../../components/Can';
 
 interface SupplierForm {
   name: string;
@@ -66,9 +67,11 @@ export function SuppliersPage() {
         title="Proveedores"
         description="Gestión de proveedores, información de contacto y condiciones comerciales."
         action={
-          <Button type="button" onClick={openCreate}>
-            Nuevo proveedor
-          </Button>
+          <Can permission="suppliers:create">
+            <Button type="button" onClick={openCreate}>
+              Nuevo proveedor
+            </Button>
+          </Can>
         }
       />
 
@@ -87,12 +90,16 @@ export function SuppliersPage() {
               header: '',
               render: (s) => (
                 <div className="flex gap-2">
-                  <button onClick={() => openEdit(s)} className="text-primary hover:underline text-xs">
-                    Editar
-                  </button>
-                  <button onClick={() => handleRemove(s.id)} className="text-danger hover:underline text-xs">
-                    Quitar
-                  </button>
+                  <Can permission="suppliers:update">
+                    <button onClick={() => openEdit(s)} className="text-primary hover:underline text-xs">
+                      Editar
+                    </button>
+                  </Can>
+                  <Can permission="suppliers:delete">
+                    <button onClick={() => handleRemove(s.id)} className="text-danger hover:underline text-xs">
+                      Quitar
+                    </button>
+                  </Can>
                 </div>
               ),
             },
@@ -102,43 +109,45 @@ export function SuppliersPage() {
         />
       )}
 
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editingId ? 'Editar proveedor' : 'Nuevo proveedor'}>
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <Input
-            placeholder="Nombre"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-            required
-          />
-          <Input
-            placeholder="Teléfono"
-            value={form.phone}
-            onChange={(e) => setForm({ ...form, phone: e.target.value })}
-          />
-          <Input
-            placeholder="Email"
-            type="email"
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-          />
-          <Input
-            placeholder="Dirección"
-            value={form.address}
-            onChange={(e) => setForm({ ...form, address: e.target.value })}
-          />
-          <Input
-            placeholder="Notas"
-            value={form.notes}
-            onChange={(e) => setForm({ ...form, notes: e.target.value })}
-          />
-          <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>
-              Cancelar
-            </Button>
-            <Button type="submit">{editingId ? 'Guardar' : 'Agregar'}</Button>
-          </div>
-        </form>
-      </Modal>
+      <Can permission="suppliers:create">
+        <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editingId ? 'Editar proveedor' : 'Nuevo proveedor'}>
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <Input
+              placeholder="Nombre"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              required
+            />
+            <Input
+              placeholder="Teléfono"
+              value={form.phone}
+              onChange={(e) => setForm({ ...form, phone: e.target.value })}
+            />
+            <Input
+              placeholder="Email"
+              type="email"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+            />
+            <Input
+              placeholder="Dirección"
+              value={form.address}
+              onChange={(e) => setForm({ ...form, address: e.target.value })}
+            />
+            <Input
+              placeholder="Notas"
+              value={form.notes}
+              onChange={(e) => setForm({ ...form, notes: e.target.value })}
+            />
+            <div className="flex justify-end gap-2 pt-2">
+              <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit">{editingId ? 'Guardar' : 'Agregar'}</Button>
+            </div>
+          </form>
+        </Modal>
+      </Can>
     </Card>
     </div>
   );

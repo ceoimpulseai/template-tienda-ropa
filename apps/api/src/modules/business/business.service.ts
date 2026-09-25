@@ -1,6 +1,7 @@
 import { NotFoundError } from '../../lib/errors.js';
 import { Business } from './business.model.js';
 import type { UpdateBusinessInput } from '@template/shared';
+import { getPermissionsForRole } from '@template/shared';
 
 export const businessService = {
   async getById(businessId: string) {
@@ -11,5 +12,9 @@ export const businessService = {
     const business = await Business.findByPk(businessId);
     if (!business) throw new NotFoundError('BUSINESS_NOT_FOUND');
     return business.update(input);
+  },
+
+  getPermissionsForRole(role: string) {
+    return getPermissionsForRole(role as any);
   },
 };

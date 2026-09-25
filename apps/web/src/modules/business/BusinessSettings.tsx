@@ -8,6 +8,7 @@ import { PageHeader } from '../../components/PageHeader';
 import { useApi } from '../../lib/useApi';
 import { apiFetch } from '../../lib/apiFetch';
 import type { Business } from '@template/shared';
+import { Can } from '../../components/Can';
 
 export function BusinessSettings() {
   const { data: business, loading, refetch } = useApi<Business>('/business');
@@ -58,9 +59,11 @@ export function BusinessSettings() {
         title="Negocio"
         description="Parámetros generales de tu empresa, moneda y enlace al catálogo público."
         action={
-          <Button type="button" onClick={() => setModalOpen(true)}>
-            Editar
-          </Button>
+          <Can permission="business:update">
+            <Button type="button" onClick={() => setModalOpen(true)}>
+              Editar
+            </Button>
+          </Can>
         }
       />
 
@@ -84,35 +87,37 @@ export function BusinessSettings() {
         </div>
       )}
 
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Editar negocio">
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <Input
-            placeholder="Nombre del negocio"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-          />
-          <Input
-            placeholder="Símbolo de moneda"
-            value={form.currencySymbol}
-            onChange={(e) => setForm({ ...form, currencySymbol: e.target.value })}
-          />
-          <Input
-            type="number"
-            placeholder="IVA %"
-            value={form.taxPercent}
-            onChange={(e) => setForm({ ...form, taxPercent: Number(e.target.value) })}
-          />
-          <Input
-            placeholder="WhatsApp para pedidos (ej. +54 9 11 1234-5678)"
-            value={form.catalogWhatsapp}
-            onChange={(e) => setForm({ ...form, catalogWhatsapp: e.target.value })}
-          />
-          <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>Cancelar</Button>
-            <Button type="submit">Guardar</Button>
-          </div>
-        </form>
-      </Modal>
+      <Can permission="business:update">
+        <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Editar negocio">
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <Input
+              placeholder="Nombre del negocio"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+            />
+            <Input
+              placeholder="Símbolo de moneda"
+              value={form.currencySymbol}
+              onChange={(e) => setForm({ ...form, currencySymbol: e.target.value })}
+            />
+            <Input
+              type="number"
+              placeholder="IVA %"
+              value={form.taxPercent}
+              onChange={(e) => setForm({ ...form, taxPercent: Number(e.target.value) })}
+            />
+            <Input
+              placeholder="WhatsApp para pedidos (ej. +54 9 11 1234-5678)"
+              value={form.catalogWhatsapp}
+              onChange={(e) => setForm({ ...form, catalogWhatsapp: e.target.value })}
+            />
+            <div className="flex justify-end gap-2 pt-2">
+              <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>Cancelar</Button>
+              <Button type="submit">Guardar</Button>
+            </div>
+          </form>
+        </Modal>
+      </Can>
     </Card>
       )}
     </div>

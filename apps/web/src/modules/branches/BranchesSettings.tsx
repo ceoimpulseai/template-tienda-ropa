@@ -9,6 +9,7 @@ import { PageHeader } from '../../components/PageHeader';
 import { useApi } from '../../lib/useApi';
 import { apiFetch } from '../../lib/apiFetch';
 import type { Branch } from '@template/shared';
+import { Can } from '../../components/Can';
 
 export function BranchesSettings() {
   const { data, loading, refetch } = useApi<Branch[]>('/branches');
@@ -35,10 +36,12 @@ export function BranchesSettings() {
       />
 
       <Card>
-        <form onSubmit={handleSubmit} className="mb-4 flex gap-2">
-          <Input placeholder="Nombre de la sucursal" value={name} onChange={(e) => setName(e.target.value)} required />
-          <Button type="submit">Agregar</Button>
-        </form>
+        <Can permission="branches:create">
+          <form onSubmit={handleSubmit} className="mb-4 flex gap-2">
+            <Input placeholder="Nombre de la sucursal" value={name} onChange={(e) => setName(e.target.value)} required />
+            <Button type="submit">Agregar</Button>
+          </form>
+        </Can>
 
         {loading ? (
           <p className="text-text-muted">Cargando…</p>
@@ -51,9 +54,11 @@ export function BranchesSettings() {
                 header: '',
                 render: (b) =>
                   !b.isDefault ? (
-                    <button onClick={() => handleRemove(b.id)} className="text-danger">
-                      Quitar
-                    </button>
+                    <Can permission="branches:delete">
+                      <button onClick={() => handleRemove(b.id)} className="text-danger">
+                        Quitar
+                      </button>
+                    </Can>
                   ) : null,
               },
             ]}
