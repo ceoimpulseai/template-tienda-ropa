@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useMemo, type ReactNode, useEffect
 import { authClient } from '../lib/auth-client';
 import { apiFetch } from '../lib/apiFetch';
 import type { Permission } from '@template/shared';
+import { getPermissionsForRole, type Role } from '@template/shared';
 
 export interface AppUser {
   id: string;
@@ -25,9 +26,12 @@ interface AuthContextValue {
   isPending: boolean;
   error: unknown;
   signOut: () => Promise<void>;
-  signInDemo: (email?: string, name?: string) => void;
+  signInDemo: (email?: string, name?: string, role?: string) => void;
   permissions: Permission[] | null;
   setPermissions: (perms: Permission[]) => void;
+  isDemo: boolean;
+  customRole: Role;
+  setCustomRole: (role: Role) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -46,8 +50,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [customEmail, setCustomEmail] = useState(() => {
     return localStorage.getItem(DEMO_EMAIL_STORAGE_KEY) || 'ceo.impulseai@gmail.com';
   });
-  const [customRole, setCustomRole] = useState(() => {
-    return localStorage.getItem(DEMO_ROLE_STORAGE_KEY) || 'admin';
+  const [customRole, setCustomRole] = useState<Role>(() => {
+    return (localStorage.getItem(DEMO_ROLE_STORAGE_KEY) as Role) || 'admin';
   });
   const [permissions, setPermissions] = useState<Permission[] | null>(null);
 
@@ -91,6 +95,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    // Demo mode: no real better-auth session, use local role
+    if (!betterAuthSession.data?.user) {
+      const perms = getPermissionsForRole(customRole);
+      setPermissions(perms);
+      return;
+    }
+
     let cancelled = false;
 
     async function fetchPermissions() {
@@ -110,7 +121,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [activeData?.user?.id]);
+  }, [activeData?.user?.id, betterAuthSession.data?.user?.id, customRole]);
 
   const signOut = async () => {
     setIsLoggedOut(true);
@@ -125,7 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInDemo = (email?: string, name?: string, role?: string) => {
     const nextEmail = email || 'ceo.impulseai@gmail.com';
-    const nextRole = role || 'admin';
+    const nextRole = (role as Role) || 'admin';
     setCustomEmail(nextEmail);
     setCustomRole(nextRole);
     localStorage.setItem(DEMO_EMAIL_STORAGE_KEY, nextEmail);
@@ -137,6 +148,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(LOGGED_OUT_STORAGE_KEY);
   };
 
+  const isDemo = !betterAuthSession.data?.user && !!activeData?.user;
+
   return (
     <AuthContext.Provider
       value={{
@@ -147,6 +160,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signInDemo,
         permissions,
         setPermissions,
+        isDemo,
+        customRole,
+        setCustomRole,
       }}
     >
       {children}

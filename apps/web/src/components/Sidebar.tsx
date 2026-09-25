@@ -4,6 +4,7 @@ import { businessConfig, type NavEntry } from '../config/business.config';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/ThemeContext';
 import { useCan } from '../hooks/useCan';
+import { ROLES, ROLE_LABELS, type Role } from '@template/shared';
 import {
   SidebarToggleIcon,
   BarChartIcon,
@@ -57,7 +58,7 @@ function getNavIcon(entry: NavEntry) {
 }
 
 export function Sidebar() {
-  const { data: session, signOut } = useAuth();
+  const { data: session, signOut, isDemo, customRole, setCustomRole } = useAuth();
   const { permissions } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const can = useCan();
@@ -248,6 +249,29 @@ export function Sidebar() {
                 />
               </div>
             </button>
+
+            <div className="my-1.5 border-t border-neutral-750" />
+
+            {/* Demo Role Switcher */}
+            {isDemo && (
+              <>
+                <div className="my-1.5 border-t border-neutral-750" />
+                <div className="px-3 py-1 text-[11px] font-medium tracking-wider uppercase text-neutral-500">
+                  Rol de prueba
+                </div>
+                <select
+                  value={customRole}
+                  onChange={(e) => setCustomRole(e.target.value as Role)}
+                  className="mx-3 mb-2 w-[calc(100%-24px)] rounded-lg border border-neutral-700 bg-neutral-800 px-2 py-1.5 text-xs text-neutral-200 focus:outline-none focus:ring-1 focus:ring-sky-500"
+                >
+                  {ROLES.map((r) => (
+                    <option key={r} value={r}>
+                      {ROLE_LABELS[r]}
+                    </option>
+                  ))}
+                </select>
+              </>
+            )}
 
             <div className="my-1.5 border-t border-neutral-750" />
 
