@@ -13,6 +13,11 @@ export class Business extends Model<InferAttributes<Business>, InferCreationAttr
   declare currencySymbol: CreationOptional<string>;
   declare taxPercent: CreationOptional<number>;
   declare catalogWhatsapp: CreationOptional<string | null>;
+  declare taxId: CreationOptional<string | null>;
+  declare issuerCondition: CreationOptional<string | null>;
+  declare arcaEnvironment: CreationOptional<string>;
+  declare arcaCertPem: CreationOptional<string | null>;
+  declare arcaPrivateKeyPem: CreationOptional<string | null>;
 }
 
 Business.init(
@@ -22,6 +27,11 @@ Business.init(
     currencySymbol: { type: DataTypes.STRING, allowNull: false, defaultValue: '$' },
     taxPercent: { type: DataTypes.FLOAT, allowNull: false, defaultValue: 0 },
     catalogWhatsapp: { type: DataTypes.STRING, allowNull: true },
+    taxId: { type: DataTypes.STRING(11), allowNull: true, unique: true },
+    issuerCondition: { type: DataTypes.STRING, allowNull: true },
+    arcaEnvironment: { type: DataTypes.STRING, allowNull: false, defaultValue: 'homologation' },
+    arcaCertPem: { type: DataTypes.TEXT, allowNull: true },
+    arcaPrivateKeyPem: { type: DataTypes.TEXT, allowNull: true },
   },
   { sequelize, modelName: 'business', tableName: 'businesses' },
 );

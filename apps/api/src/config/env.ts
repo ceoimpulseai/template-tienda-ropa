@@ -1,6 +1,8 @@
 import 'dotenv/config';
 import { z } from 'zod';
 
+const DEV_ARCA_MASTER_KEY = '0000000000000000000000000000000000000000000000000000000000000000';
+
 const envSchema = z.object({
   PORT: z.coerce.number().default(4000),
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
@@ -19,12 +21,20 @@ const envSchema = z.object({
   SMTP_PASSWORD: z.string().optional(),
   SMTP_FROM: z.string().default('no-reply@template.local'),
   TEST_AUTH_HEADER_ENABLED: z.coerce.boolean().default(false),
+  ARCA_MASTER_KEY: z.string().regex(/^[0-9a-fA-F]{64}$/).default(DEV_ARCA_MASTER_KEY),
 }).superRefine((data, ctx) => {
   if (data.NODE_ENV === 'production' && data.BETTER_AUTH_SECRET === 'dev-secret-change-me') {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       path: ['BETTER_AUTH_SECRET'],
       message: 'BETTER_AUTH_SECRET must be set to a real secret in production (refusing to boot with the dev default).',
+    });
+  }
+  if (data.NODE_ENV === 'production' && data.ARCA_MASTER_KEY === DEV_ARCA_MASTER_KEY) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['ARCA_MASTER_KEY'],
+      message: 'ARCA_MASTER_KEY must be set to a real 64-char hex key in production (refusing to boot with the dev default).',
     });
   }
 });

@@ -5,6 +5,7 @@ export const branchSchema = z.object({
   businessId: z.string(),
   name: z.string().min(1),
   isDefault: z.boolean().default(false),
+  salesPoint: z.number().int().positive().nullable().default(null),
 });
 export type Branch = z.infer<typeof branchSchema>;
 

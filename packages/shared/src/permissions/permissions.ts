@@ -22,6 +22,7 @@ export const PERMISSIONS = [
   'purchases:create',
   'sales:read',
   'sales:create',
+  'sales:update',
   'costs:read',
   'costs:create',
   'costs:delete',

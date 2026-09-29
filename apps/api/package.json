@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "scripts": {
     "dev": "tsx watch src/server.ts",
@@ -17,6 +17,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@arcasdk/core": "^2.0.2",
     "@template/shared": "*",
     "better-auth": "^1.6.0",
     "cors": "^2.8.5",

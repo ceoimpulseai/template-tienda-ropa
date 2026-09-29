@@ -31,6 +31,7 @@ export const saleSchema = z.object({
   unitPrice: z.number().nonnegative(),
   isInternal: z.boolean(),
   amountReceived: z.number().nonnegative(),
+  arcaStatus: z.enum(['authorized', 'rejected', 'indeterminate']).nullable().default(null),
 });
 export type Sale = z.infer<typeof saleSchema>;
 

@@ -7,4 +7,5 @@ export * from './schemas/item.js';
 export * from './schemas/supplier.js';
 export * from './schemas/example.js';
 export * from './schemas/financials.js';
+export * from './schemas/arca.js';
 export * from './permissions/index.js';

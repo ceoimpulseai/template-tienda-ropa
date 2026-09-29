@@ -11,6 +11,7 @@ import { saleRoutes } from '../modules/_example/sales/sale.routes.js';
 import { costRoutes } from '../modules/_example/costs/cost.routes.js';
 import { metricsRoutes } from '../modules/_example/metrics/metrics.routes.js';
 import { financialsRoutes } from '../modules/_example/financials/financials.routes.js';
+import { arcaRoutes } from '../modules/arca/arca.routes.js';
 
 export const routes = Router();
 
@@ -28,3 +29,4 @@ routes.use('/sales', saleRoutes);
 routes.use('/costs', costRoutes);
 routes.use('/metrics', metricsRoutes);
 routes.use('/financials', financialsRoutes);
+routes.use('/', arcaRoutes);

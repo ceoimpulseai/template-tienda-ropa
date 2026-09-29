@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { issuerConditionEnum } from './arca.js';
 
 export const customerSchema = z.object({
   id: z.string(),
@@ -6,6 +7,9 @@ export const customerSchema = z.object({
   name: z.string().min(1),
   email: z.string().email().nullable(),
   phone: z.string().nullable(),
+  cuit: z.string().nullable().default(null),
+  dni: z.string().nullable().default(null),
+  vatCondition: issuerConditionEnum.nullable().default(null),
 });
 export type Customer = z.infer<typeof customerSchema>;
 

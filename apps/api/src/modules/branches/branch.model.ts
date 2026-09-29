@@ -12,6 +12,7 @@ export class Branch extends Model<InferAttributes<Branch>, InferCreationAttribut
   declare businessId: string;
   declare name: string;
   declare isDefault: CreationOptional<boolean>;
+  declare salesPoint: CreationOptional<number | null>;
 }
 
 Branch.init(
@@ -20,6 +21,7 @@ Branch.init(
     businessId: { type: DataTypes.UUID, allowNull: false },
     name: { type: DataTypes.STRING, allowNull: false },
     isDefault: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+    salesPoint: { type: DataTypes.INTEGER, allowNull: true },
   },
   { sequelize, modelName: 'branch', tableName: 'branches' },
 );

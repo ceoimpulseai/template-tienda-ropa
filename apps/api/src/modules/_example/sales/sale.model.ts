@@ -18,6 +18,7 @@ export class Sale extends Model<InferAttributes<Sale>, InferCreationAttributes<S
   declare unitPrice: number;
   declare isInternal: CreationOptional<boolean>;
   declare amountReceived: number;
+  declare arcaStatus: CreationOptional<string | null>;
 }
 
 Sale.init(
@@ -31,6 +32,7 @@ Sale.init(
     unitPrice: { type: DataTypes.FLOAT, allowNull: false },
     isInternal: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
     amountReceived: { type: DataTypes.FLOAT, allowNull: false, defaultValue: 0 },
+    arcaStatus: { type: DataTypes.STRING, allowNull: true, defaultValue: null },
   },
   { sequelize, modelName: 'sale', tableName: 'sales' },
 );
