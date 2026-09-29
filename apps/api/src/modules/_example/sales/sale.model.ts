@@ -32,7 +32,7 @@ Sale.init(
     unitPrice: { type: DataTypes.FLOAT, allowNull: false },
     isInternal: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
     amountReceived: { type: DataTypes.FLOAT, allowNull: false, defaultValue: 0 },
-    arcaStatus: { type: DataTypes.STRING, allowNull: true, defaultValue: null },
+    arcaStatus: { type: DataTypes.STRING, allowNull: true, defaultValue: null, field: 'arcaStatus' },
   },
   { sequelize, modelName: 'sale', tableName: 'sales' },
 );

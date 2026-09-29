@@ -11,12 +11,69 @@ import { Modal } from '../../../ui/Modal';
 import { PageHeader } from '../../../components/PageHeader';
 import { useApi } from '../../../lib/useApi';
 import { apiFetch } from '../../../lib/apiFetch';
-import type { Item, Sale } from '@template/shared';
+import type { Item, Sale, Customer } from '@template/shared';
 import { Can } from '../../../components/Can';
+
+const ARCA_STATUS_LABELS: Record<string, { label: string; tone: 'neutral' | 'info' | 'success' | 'warning' | 'danger' }> = {
+  null: { label: 'Pendiente', tone: 'neutral' },
+  authorized: { label: 'Facturado', tone: 'success' },
+  rejected: { label: 'Rechazado', tone: 'danger' },
+  indeterminate: { label: 'Indeterminado', tone: 'warning' },
+};
+
+const ARCA_ERROR_MESSAGES: Record<string, string> = {
+  ARCA_NOT_CONFIGURED: 'ARCA no está configurado. Configurá CUIT y certificados en Negocio > Facturación Electrónica.',
+  SALE_MISSING_CUSTOMER: 'La venta debe tener un cliente asignado.',
+  CUSTOMER_MISSING_FISCAL_ID: 'El cliente necesita CUIT/DNI para facturar.',
+  BRANCH_MISSING_SALES_POINT: 'La sucursal activa no tiene punto de venta. Configuralo en Sucursales.',
+  SALE_ALREADY_EMITTED: 'Esta venta ya fue facturada.',
+  ARCA_TIMEOUT: 'ARCA no respondió. Reintentá en unos segundos.',
+};
+
+interface IssueResultModalProps {
+  open: boolean;
+  onClose: () => void;
+  result?: {
+    saleId: string;
+    status: string;
+    cae?: string;
+    number?: number;
+    message?: string;
+  };
+  error?: string;
+}
+
+function IssueResultModal({ open, onClose, result, error }: IssueResultModalProps) {
+  if (!open) return null;
+  return (
+    <Modal open={true} onClose={onClose} title={error ? 'Error al facturar' : 'Factura emitida'} size="md">
+      {error ? (
+        <div className="space-y-3">
+          <p className="text-text">{error}</p>
+          <div className="flex justify-end">
+            <Button onClick={onClose}>Entendido</Button>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          <div className="p-3 rounded-lg bg-success-subtle text-success">
+            <p className="font-medium">Factura autorizada</p>
+            {result?.cae && <p className="text-sm mt-1">CAE: <span className="font-mono">{result.cae}</span></p>}
+            {result?.number && <p className="text-sm">Número: {result.number}</p>}
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="secondary" onClick={onClose}>Cerrar</Button>
+          </div>
+        </div>
+      )}
+    </Modal>
+  );
+}
 
 export function SalesPage() {
   const { data, loading, refetch } = useApi<Sale[]>('/sales');
   const { data: items } = useApi<Item[]>('/items');
+  const { data: customers } = useApi<Customer[]>('/customers');
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState({
     itemId: '',
@@ -25,16 +82,45 @@ export function SalesPage() {
     unitPrice: 0,
     isInternal: false,
     amountReceived: undefined as number | undefined,
+    issueNow: false,
+  });
+  const [issuingId, setIssuingId] = useState<string | null>(null);
+  const [issueModal, setIssueModal] = useState<{ open: boolean; result?: { saleId: string; status: string; cae?: string; number?: number; message?: string }; error?: string }>({
+    open: false,
   });
 
   function openCreate() {
-    setForm({ itemId: '', customerId: '', quantity: 1, unitPrice: 0, isInternal: false, amountReceived: undefined });
+    setForm({ itemId: '', customerId: '', quantity: 1, unitPrice: 0, isInternal: false, amountReceived: undefined, issueNow: false });
     setModalOpen(true);
+  }
+
+  async function handleIssue(saleId: string) {
+    setIssuingId(saleId);
+    try {
+      const voucher = await apiFetch(`/sales/${saleId}/issue`, { method: 'POST' });
+      setIssueModal({
+        open: true,
+        result: {
+          saleId,
+          status: voucher.result,
+          cae: voucher.arcaVoucherId,
+          number: voucher.arcaVoucherNumber,
+          message: voucher.emissionMessage,
+        },
+      });
+      refetch();
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error al facturar';
+      const friendlyMessage = ARCA_ERROR_MESSAGES[message] ?? message;
+      setIssueModal({ open: true, error: friendlyMessage });
+    } finally {
+      setIssuingId(null);
+    }
   }
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    const { customerId, amountReceived, isInternal, ...rest } = form;
+    const { customerId, amountReceived, isInternal, issueNow, ...rest } = form;
     const payload: Record<string, unknown> = { ...rest, isInternal };
     if (customerId) payload.customerId = customerId;
     if (isInternal) {
@@ -42,9 +128,38 @@ export function SalesPage() {
     } else if (amountReceived !== undefined) {
       payload.amountReceived = amountReceived;
     }
-    await apiFetch('/sales', { method: 'POST', body: JSON.stringify(payload) });
+    const sale = await apiFetch('/sales', { method: 'POST', body: JSON.stringify(payload) });
     setModalOpen(false);
     refetch();
+
+    if (issueNow && sale?.id) {
+      setIssuingId(sale.id);
+      try {
+        const voucher = await apiFetch(`/sales/${sale.id}/issue`, { method: 'POST' });
+        setIssueModal({
+          open: true,
+          result: {
+            saleId: sale.id,
+            status: voucher.result,
+            cae: voucher.arcaVoucherId,
+            number: voucher.arcaVoucherNumber,
+            message: voucher.emissionMessage,
+          },
+        });
+        refetch();
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Error al facturar';
+        const friendlyMessage = ARCA_ERROR_MESSAGES[message] ?? message;
+        setIssueModal({ open: true, error: friendlyMessage });
+      } finally {
+        setIssuingId(null);
+      }
+    }
+  }
+
+  function getArcaStatusInfo(sale: Sale) {
+    const status = sale.arcaStatus ?? 'null';
+    return ARCA_STATUS_LABELS[status] ?? { label: status, tone: 'neutral' as const };
   }
 
   return (
@@ -63,27 +178,61 @@ export function SalesPage() {
 
       <Card>
         {loading ? (
-        <p className="text-text-muted">Cargando…</p>
-      ) : (
-        <Table<Sale>
-          columns={[
-            { header: 'Producto', render: (s) => s.itemId },
-            { header: 'Cantidad', render: (s) => s.quantity },
-            { header: 'Precio unitario', render: (s) => s.unitPrice },
-            {
-              header: 'Tipo',
-              render: (s) => (
-                <Badge tone={s.isInternal ? 'warning' : 'success'}>
-                  {s.isInternal ? 'Interna' : 'Normal'}
-                </Badge>
-              ),
-            },
-            { header: 'Recibido', render: (s) => `$${s.amountReceived}` },
-          ]}
-          rows={data ?? []}
-          rowKey={(s) => s.id}
-        />
-      )}
+          <p className="text-text-muted">Cargando…</p>
+        ) : (
+          <Table<Sale>
+            columns={[
+              { header: 'Producto', render: (s) => s.itemId },
+              { header: 'Cantidad', render: (s) => s.quantity },
+              { header: 'Precio unitario', render: (s) => s.unitPrice },
+              {
+                header: 'Tipo',
+                render: (s) => (
+                  <Badge tone={s.isInternal ? 'warning' : 'success'}>
+                    {s.isInternal ? 'Interna' : 'Normal'}
+                  </Badge>
+                ),
+              },
+              { header: 'Recibido', render: (s) => `$${s.amountReceived}` },
+              {
+                header: 'Facturación',
+                render: (s) => {
+                  const { label, tone } = getArcaStatusInfo(s);
+                  return (
+                    <div className="flex items-center gap-2">
+                      <Badge tone={tone}>{label}</Badge>
+                      <Can permission="sales:update">
+                        {s.arcaStatus !== 'authorized' && s.arcaStatus !== 'indeterminate' && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleIssue(s.id)}
+                            disabled={issuingId === s.id}
+                          >
+                            {issuingId === s.id ? 'Facturando…' : 'Facturar'}
+                          </Button>
+                        )}
+                        {s.arcaStatus === 'rejected' && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleIssue(s.id)}
+                            disabled={issuingId === s.id}
+                          >
+                            Reintentar
+                          </Button>
+                        )}
+                      </Can>
+                    </div>
+                  );
+                },
+              },
+            ]}
+            rows={data ?? []}
+            rowKey={(s) => s.id}
+          />
+        )}
+      </Card>
 
       <Can permission="sales:create">
         <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Nueva venta">
@@ -115,11 +264,18 @@ export function SalesPage() {
               onChange={(e) => setForm({ ...form, unitPrice: Number(e.target.value) })}
               required
             />
-            <Input
-              placeholder="ID de cliente (opcional)"
+            <select
               value={form.customerId}
               onChange={(e) => setForm({ ...form, customerId: e.target.value })}
-            />
+              className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm text-text"
+            >
+              <option value="">Sin cliente</option>
+              {(customers ?? []).map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
             <label className="flex items-center gap-2 text-sm text-text">
               <Checkbox
                 checked={form.isInternal}
@@ -137,6 +293,13 @@ export function SalesPage() {
                 onChange={(e) => setForm({ ...form, amountReceived: Number(e.target.value) })}
               />
             )}
+            <label className="flex items-center gap-2 text-sm text-text">
+              <Checkbox
+                checked={form.issueNow}
+                onChange={(e) => setForm({ ...form, issueNow: e.target.checked })}
+              />
+              Facturar ahora
+            </label>
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>Cancelar</Button>
               <Button type="submit">Registrar venta</Button>
@@ -144,7 +307,13 @@ export function SalesPage() {
           </form>
         </Modal>
       </Can>
-    </Card>
+
+      <IssueResultModal
+        open={issueModal.open}
+        onClose={() => setIssueModal({ open: false })}
+        result={issueModal.result}
+        error={issueModal.error}
+      />
     </div>
   );
 }

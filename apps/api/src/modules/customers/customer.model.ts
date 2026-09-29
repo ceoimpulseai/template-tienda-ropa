@@ -25,9 +25,9 @@ Customer.init(
     name: { type: DataTypes.STRING, allowNull: false },
     email: { type: DataTypes.STRING, allowNull: true },
     phone: { type: DataTypes.STRING, allowNull: true },
-    cuit: { type: DataTypes.STRING(11), allowNull: true },
-    dni: { type: DataTypes.STRING, allowNull: true },
-    vatCondition: { type: DataTypes.STRING, allowNull: true, defaultValue: 'Consumidor Final' },
+    cuit: { type: DataTypes.STRING(11), allowNull: true, field: 'cuit' },
+    dni: { type: DataTypes.STRING, allowNull: true, field: 'dni' },
+    vatCondition: { type: DataTypes.STRING, allowNull: true, defaultValue: 'Consumidor Final', field: 'vatCondition' },
   },
   { sequelize, modelName: 'customer', tableName: 'customers' },
 );

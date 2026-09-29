@@ -21,7 +21,7 @@ Branch.init(
     businessId: { type: DataTypes.UUID, allowNull: false },
     name: { type: DataTypes.STRING, allowNull: false },
     isDefault: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
-    salesPoint: { type: DataTypes.INTEGER, allowNull: true },
+    salesPoint: { type: DataTypes.INTEGER, allowNull: true, field: 'salesPoint' },
   },
   { sequelize, modelName: 'branch', tableName: 'branches' },
 );

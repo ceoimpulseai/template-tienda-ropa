@@ -20,16 +20,21 @@ function createSequelize(): Sequelize {
     return new Sequelize({ dialect: 'sqlite', storage: './dev.sqlite', logging: false });
   }
 
+  const commonOptions = {
+    dialect: 'postgres',
+    logging: false,
+    pool: postgresPool,
+    quoteIdentifiers: true,
+  };
+
   if (env.DATABASE_URL) {
-    return new Sequelize(env.DATABASE_URL, { dialect: 'postgres', logging: false, pool: postgresPool });
+    return new Sequelize(env.DATABASE_URL, commonOptions);
   }
 
   return new Sequelize(env.DB_NAME!, env.DB_USER!, env.DB_PASSWORD, {
     host: env.DB_HOST,
     port: env.DB_PORT ?? 5432,
-    dialect: 'postgres',
-    logging: false,
-    pool: postgresPool,
+    ...commonOptions,
   });
 }
 
