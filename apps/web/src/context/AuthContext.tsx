@@ -55,6 +55,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
   const [permissions, setPermissions] = useState<Permission[] | null>(null);
 
+  // Auto-reset isLoggedOut when a real better-auth session appears
+  useEffect(() => {
+    if (betterAuthSession.data?.user && isLoggedOut) {
+      setIsLoggedOut(false);
+      localStorage.removeItem(LOGGED_OUT_STORAGE_KEY);
+    }
+  }, [betterAuthSession.data?.user?.id, isLoggedOut]);
+
   const demoSession = useMemo<AppSession | null>(() => {
     if (isLoggedOut) return null;
     return {

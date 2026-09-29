@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { up, down } from './00007-arca-vouchers.js';
+import { up, down } from '../migrations/00007-arca-vouchers.js';
 
 describe('00007-arca-vouchers migration', () => {
   it('exports up and down functions', () => {

@@ -23,6 +23,7 @@ export function LoginPage() {
         navigate('/');
         return;
       }
+      signInDemo(form.email); // reset isLoggedOut for immediate redirect
       navigate('/');
     } catch {
       signInDemo(form.email);
