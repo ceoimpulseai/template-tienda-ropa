@@ -30,8 +30,8 @@ export const ticketStorage = {
     );
   },
 
-  // Get a valid (non-expired) ticket for the given service
-  // Returns null if no ticket exists or if the ticket is expired
+// Get a valid (non-expired) ticket for the given service
+  // Returns null if no ticket exists, if expired, or if token/sign are missing
   async get(serviceName: ServiceName): Promise<AccessTicket | null> {
     const [rows] = await sequelize.query(
       'SELECT value FROM arca_store WHERE id = ?',
@@ -44,6 +44,9 @@ export const ticketStorage = {
 
     // Return null if expired — SDK will re-authenticate
     if (isTicketExpired(ticket)) return null;
+
+    // Return null if token or sign are missing/empty — SDK will re-authenticate
+    if (!ticket.token || !ticket.sign) return null;
 
     // Return ticket with isExpired(), getToken() and getSign() methods that SDK requires
     // Uses real expiration check so SDK can call it directly
