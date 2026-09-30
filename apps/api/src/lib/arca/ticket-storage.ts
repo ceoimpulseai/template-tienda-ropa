@@ -45,11 +45,12 @@ export const ticketStorage = {
     // Return null if expired — SDK will re-authenticate
     if (isTicketExpired(ticket)) return null;
 
-    // Return ticket with isExpired() and getToken() methods that SDK requires
+    // Return ticket with isExpired(), getToken() and getSign() methods that SDK requires
     // Uses real expiration check so SDK can call it directly
     return Object.assign(ticket, {
       isExpired: () => isTicketExpired(ticket),
       getToken: () => ticket.token,
+      getSign: () => ticket.sign,
     });
   },
 
