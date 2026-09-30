@@ -22,6 +22,7 @@ const envSchema = z.object({
   SMTP_FROM: z.string().default('no-reply@template.local'),
   TEST_AUTH_HEADER_ENABLED: z.coerce.boolean().default(false),
   ARCA_MASTER_KEY: z.string().regex(/^[0-9a-fA-F]{64}$/).default(DEV_ARCA_MASTER_KEY),
+  ARCA_TIMEOUT_MS: z.coerce.number().default(20_000),
 }).superRefine((data, ctx) => {
   if (data.NODE_ENV === 'production' && data.BETTER_AUTH_SECRET === 'dev-secret-change-me') {
     ctx.addIssue({

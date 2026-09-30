@@ -8,7 +8,7 @@ import { Customer } from '../../modules/customers/customer.model.js';
 import { Item } from '../../modules/items/item.model.js';
 import { Sale } from '../../modules/_example/sales/sale.model.js';
 import { issueInvoice } from './invoicing.service.js';
-import { deriveTenantKey, encryptPem } from './crypto.js';
+import { encryptPem } from './crypto.js';
 import { ValidationError, ConflictError, NotFoundError } from '../errors.js';
 
 // Mock the factory to return a controlled ArcaService
@@ -39,9 +39,8 @@ async function seedTestData() {
   const customerId = randomUUID();
   const saleId = randomUUID();
 
-  const tenantKey = deriveTenantKey(businessId);
-  const encryptedCert = encryptPem(tenantKey, TEST_CERT_PEM);
-  const encryptedKey = encryptPem(tenantKey, TEST_KEY_PEM);
+  const encryptedCert = encryptPem(businessId, TEST_CERT_PEM);
+  const encryptedKey = encryptPem(businessId, TEST_KEY_PEM);
 
   await Business.create({
     id: businessId,
@@ -278,14 +277,14 @@ describe('issueInvoice', () => {
   it('handles conflict outcome by returning existing voucher', async () => {
     const { businessId, branchId, saleId } = await seedTestData();
 
-    // Pre-insert an existing voucher
+// Pre-insert an existing voucher
     const existingVoucherId = randomUUID();
     await sequelize.query(
       `INSERT INTO arca_vouchers
         (id, "businessId", "saleId", result, "arcaVoucherId", "arcaVoucherNumber",
          "emissionCode", "emissionMessage", "rawResponse", "idempotencyKey", "emittedAt",
          "createdAt", "updatedAt")
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'), datetime('now'))`,
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
       {
         replacements: [
           existingVoucherId,

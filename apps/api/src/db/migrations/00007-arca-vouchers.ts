@@ -1,6 +1,27 @@
 import { DataTypes, type QueryInterface } from 'sequelize';
 import type { Migration } from '../migrate.js';
 
+// Fiscal condition enum values — single source of truth
+const FISCAL_CONDITIONS = [
+  'IVA Responsable Inscripto',
+  'IVA Responsable No Inscripto',
+  'IVA No Responsable',
+  'IVA Sujeto Exento',
+  'Consumidor Final',
+  'Responsable Monotributo',
+  'Sujeto No Categorizado',
+  'Proveedor del Exterior',
+  'Cliente del Exterior',
+  'Liberado - Ley 19.640',
+  'IVA Responsable Inscripto - Agente de Percepción',
+  'Pequeño Contribuyente Eventual',
+  'Monotributista Social',
+  'Pequeño Contribuyente Eventual Social',
+] as const;
+
+const ARCA_ENVIRONMENTS = ['production', 'homologation'] as const;
+const ARCA_STATUS_VALUES = ['authorized', 'rejected', 'indeterminate', 'conflict'] as const;
+
 export const up: Migration = async ({ context: queryInterface }: { context: QueryInterface }) => {
   // 1. Business columns (5)
   await queryInterface.addColumn('businesses', 'taxId', {
@@ -10,39 +31,12 @@ export const up: Migration = async ({ context: queryInterface }: { context: Quer
   });
 
   await queryInterface.addColumn('businesses', 'issuerCondition', {
-    type: (() => {
-      try {
-        return DataTypes.ENUM(
-          'IVA Responsable Inscripto',
-          'IVA Responsable No Inscripto',
-          'IVA No Responsable',
-          'IVA Sujeto Exento',
-          'Consumidor Final',
-          'Responsable Monotributo',
-          'Sujeto No Categorizado',
-          'Proveedor del Exterior',
-          'Cliente del Exterior',
-          'Liberado - Ley 19.640',
-          'IVA Responsable Inscripto - Agente de Percepción',
-          'Pequeño Contribuyente Eventual',
-          'Monotributista Social',
-          'Pequeño Contribuyente Eventual Social',
-        );
-      } catch {
-        return DataTypes.STRING;
-      }
-    })(),
+    type: DataTypes.ENUM(...FISCAL_CONDITIONS),
     allowNull: true,
   });
 
   await queryInterface.addColumn('businesses', 'arcaEnvironment', {
-    type: (() => {
-      try {
-        return DataTypes.ENUM('production', 'homologation');
-      } catch {
-        return DataTypes.STRING;
-      }
-    })(),
+    type: DataTypes.ENUM(...ARCA_ENVIRONMENTS),
     allowNull: false,
     defaultValue: 'homologation',
   });
@@ -75,41 +69,14 @@ export const up: Migration = async ({ context: queryInterface }: { context: Quer
   });
 
   await queryInterface.addColumn('customers', 'vatCondition', {
-    type: (() => {
-      try {
-        return DataTypes.ENUM(
-          'IVA Responsable Inscripto',
-          'IVA Responsable No Inscripto',
-          'IVA No Responsable',
-          'IVA Sujeto Exento',
-          'Consumidor Final',
-          'Responsable Monotributo',
-          'Sujeto No Categorizado',
-          'Proveedor del Exterior',
-          'Cliente del Exterior',
-          'Liberado - Ley 19.640',
-          'IVA Responsable Inscripto - Agente de Percepción',
-          'Pequeño Contribuyente Eventual',
-          'Monotributista Social',
-          'Pequeño Contribuyente Eventual Social',
-        );
-      } catch {
-        return DataTypes.STRING;
-      }
-    })(),
+    type: DataTypes.ENUM(...FISCAL_CONDITIONS),
     allowNull: true,
     defaultValue: 'Consumidor Final',
   });
 
   // 4. Sale column
   await queryInterface.addColumn('sales', 'arcaStatus', {
-    type: (() => {
-      try {
-        return DataTypes.ENUM('authorized', 'rejected', 'indeterminate');
-      } catch {
-        return DataTypes.STRING;
-      }
-    })(),
+    type: DataTypes.ENUM(...ARCA_STATUS_VALUES.slice(0, 3)), // authorized, rejected, indeterminate
     allowNull: true,
   });
 
@@ -135,13 +102,7 @@ export const up: Migration = async ({ context: queryInterface }: { context: Quer
       onUpdate: 'CASCADE',
     },
     result: {
-      type: (() => {
-        try {
-          return DataTypes.ENUM('authorized', 'rejected', 'indeterminate', 'conflict');
-        } catch {
-          return DataTypes.STRING;
-        }
-      })(),
+      type: DataTypes.ENUM(...ARCA_STATUS_VALUES),
       allowNull: false,
     },
     arcaVoucherId: {

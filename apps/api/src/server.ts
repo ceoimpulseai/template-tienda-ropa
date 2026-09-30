@@ -18,9 +18,6 @@ await sequelize.query(`
   )
 `);
 
-// Clear corrupted WSAA ticket cache (arca_store) on startup to avoid "isExpired is not a function"
-await sequelize.query(`DELETE FROM arca_store`);
-
 if (env.NODE_ENV !== 'production') {
   const { runSeeds } = await import('./seed/index.js');
   await runSeeds();

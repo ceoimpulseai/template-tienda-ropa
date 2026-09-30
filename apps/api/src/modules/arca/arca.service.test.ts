@@ -9,7 +9,7 @@ import { BusinessMember } from '../../modules/team/team.model.js';
 import { Customer } from '../../modules/customers/customer.model.js';
 import { Item } from '../../modules/items/item.model.js';
 import { Sale } from '../../modules/_example/sales/sale.model.js';
-import { deriveTenantKey, encryptPem } from '../../lib/arca/crypto.js';
+import { encryptPem } from '../../lib/arca/crypto.js';
 
 import { tenantCache, branchCache } from '../../lib/tenantCache.js';
 
@@ -43,9 +43,8 @@ async function seedArcaConfiguredBusiness(userId: string) {
   const businessId = randomUUID();
   const branchId = randomUUID();
 
-  const tenantKey = deriveTenantKey(businessId);
-  const encryptedCert = encryptPem(tenantKey, TEST_CERT_PEM);
-  const encryptedKey = encryptPem(tenantKey, TEST_KEY_PEM);
+  const encryptedCert = encryptPem(businessId, TEST_CERT_PEM);
+  const encryptedKey = encryptPem(businessId, TEST_KEY_PEM);
 
   await Business.create({
     id: businessId,
@@ -224,10 +223,9 @@ describe('ARCA routes', () => {
       expect(updatedBusiness?.arcaPrivateKeyPem).not.toBe(TEST_KEY_PEM);
 
       // Verify they can be decrypted
-      const tenantKey = deriveTenantKey(business.id);
       const { decryptPem } = await import('../../lib/arca/crypto.js');
-      expect(decryptPem(tenantKey, updatedBusiness!.arcaCertPem!)).toBe(TEST_CERT_PEM);
-      expect(decryptPem(tenantKey, updatedBusiness!.arcaPrivateKeyPem!)).toBe(TEST_KEY_PEM);
+      expect(decryptPem(business.id, updatedBusiness!.arcaCertPem!)).toBe(TEST_CERT_PEM);
+      expect(decryptPem(business.id, updatedBusiness!.arcaPrivateKeyPem!)).toBe(TEST_KEY_PEM);
     });
 
     it('updates config without PEMs when not provided', async () => {

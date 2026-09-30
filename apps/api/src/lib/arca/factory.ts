@@ -2,7 +2,13 @@
 // Enables multi-tenant: each createClient() makes an ephemeral single-CUIT Arca instance.
 
 import { Arca } from '@arcasdk/core';
-import { sequelize } from '../../config/database.js';
+import { ticketStorage } from './ticket-storage.js';
+import {
+  getVoucherType,
+  getIvaAliquot,
+  getIvaReceiverId,
+  priceIncludesVat,
+} from './fiscal-config.js';
 
 // ---- Abstract interface (our contract, independent of SDK) ----
 
@@ -40,126 +46,6 @@ export interface VoucherResult {
 
 export interface ArcaService {
   issueInvoice(input: IssueInvoiceInput): Promise<VoucherResult>;
-}
-
-// ---- ITicketStoragePort for SDK token caching (backed by arca_store table) ----
-
-interface AccessTicket {
-  token: string;
-  sign: string;
-  generationTime: string;
-  expirationTime: string;
-}
-
-type ArcaServiceName = string;
-
-interface ITicketStoragePort {
-  save(ticket: AccessTicket, serviceName: ArcaServiceName): Promise<void>;
-  get(serviceName: ArcaServiceName): Promise<AccessTicket | null>;
-  delete(serviceName: ArcaServiceName): Promise<void>;
-}
-
-const ticketStorage: ITicketStoragePort = {
-  async save(ticket: AccessTicket, serviceName: string): Promise<void> {
-    const value = JSON.stringify(ticket);
-    await sequelize.query(
-      `INSERT INTO arca_store (id, value, created_at) VALUES (?, ?, CURRENT_TIMESTAMP) ON CONFLICT (id) DO UPDATE SET value = EXCLUDED.value, created_at = CURRENT_TIMESTAMP`,
-      { replacements: [serviceName, value] },
-    );
-  },
-
-  async get(serviceName: string): Promise<AccessTicket | null> {
-    const [rows] = await sequelize.query(
-      'SELECT value FROM arca_store WHERE id = ?',
-      { replacements: [serviceName] },
-    );
-    const row = (rows as any[])[0];
-    if (!row) return null;
-    const ticket = JSON.parse(row.value) as AccessTicket;
-    // SDK expects ticket to have isExpired() method - add it
-    // Also validate expiration and return null if expired (SDK will re-auth)
-    const expired = new Date(ticket.expirationTime) <= new Date();
-    if (expired) return null;
-    return {
-      ...ticket,
-      isExpired: () => true,
-    };
-  },
-
-  async delete(serviceName: string): Promise<void> {
-    await sequelize.query(
-      'DELETE FROM arca_store WHERE id = ?',
-      { replacements: [serviceName] },
-    );
-  },
-};
-
-// ---- SOAP field name constants for ARCA electronic billing ----
-
-const VOUCHER_TYPE: Record<string, number> = {
-  'IVA Responsable Inscripto': 1,
-  'IVA Responsable No Inscripto': 6,
-  'IVA Sujeto Exento': 6,
-  'Consumidor Final': 6,
-  'Responsable Monotributo': 11,
-  'Sujeto No Categorizado': 6,
-  'Proveedor del Exterior': 6,
-  'Cliente del Exterior': 6,
-  'Liberado - Ley 19.640': 6,
-  'IVA Responsable Inscripto - Agente de Percepción': 1,
-  'Pequeño Contribuyente Eventual': 11,
-  'Monotributista Social': 11,
-  'Pequeño Contribuyente Eventual Social': 11,
-};
-
-function mapIssuerConditionToVoucherType(issuerCondition: string): number {
-  return VOUCHER_TYPE[issuerCondition] ?? 6; // default Factura B
-}
-
-// ---- IVA ID mapping (AFIP alícuotas) ----
-
-const IVA_ALIQUOTAS: Record<string, { id: number; percentage: number }> = {
-  'IVA Responsable Inscripto': { id: 5, percentage: 21 },
-  'IVA Responsable No Inscripto': { id: 5, percentage: 21 },
-  'IVA Sujeto Exento': { id: 3, percentage: 0 },
-  'Consumidor Final': { id: 5, percentage: 21 },
-  'Responsable Monotributo': { id: 5, percentage: 21 },
-  'Sujeto No Categorizado': { id: 5, percentage: 21 },
-  'Proveedor del Exterior': { id: 5, percentage: 21 },
-  'Cliente del Exterior': { id: 3, percentage: 0 },
-  'Liberado - Ley 19.640': { id: 3, percentage: 0 },
-  'IVA Responsable Inscripto - Agente de Percepción': { id: 5, percentage: 21 },
-  'Pequeño Contribuyente Eventual': { id: 5, percentage: 21 },
-  'Monotributista Social': { id: 5, percentage: 21 },
-  'Pequeño Contribuyente Eventual Social': { id: 5, percentage: 21 },
-  'Exento': { id: 3, percentage: 0 },
-};
-
-function getIvaAliquota(vatCondition: string): { id: number; percentage: number } {
-  return IVA_ALIQUOTAS[vatCondition] ?? { id: 5, percentage: 21 };
-}
-
-// ---- CondicionIVAReceptorId mapping ----
-
-const IVA_RECEIVER_CONDITION: Record<string, number> = {
-  'IVA Responsable Inscripto': 1,
-  'IVA Responsable No Inscripto': 4,
-  'IVA No Responsable': 4,
-  'IVA Sujeto Exento': 4,
-  'Consumidor Final': 4,
-  'Responsable Monotributo': 4,
-  'Sujeto No Categorizado': 4,
-  'Proveedor del Exterior': 4,
-  'Cliente del Exterior': 4,
-  'Liberado - Ley 19.640': 4,
-  'IVA Responsable Inscripto - Agente de Percepción': 1,
-  'Pequeño Contribuyente Eventual': 4,
-  'Monotributista Social': 4,
-  'Pequeño Contribuyente Eventual Social': 4,
-};
-
-function mapVatConditionToReceiverId(vatCondition: string): number {
-  return IVA_RECEIVER_CONDITION[vatCondition] ?? 4;
 }
 
 // ---- SDK result mapping ----
@@ -209,7 +95,7 @@ export function createClient(input: CreateClientInput): ArcaService {
 
   return {
     async issueInvoice(inv: IssueInvoiceInput): Promise<VoucherResult> {
-      const cbteTipo = mapIssuerConditionToVoucherType(inv.issuerCondition);
+      const cbteTipo = getVoucherType(inv.issuerCondition);
 
       // Document type: CUIT = 80, DNI = 96
       const docTipo = inv.customer.dni ? 96 : 80;
@@ -226,8 +112,8 @@ export function createClient(input: CreateClientInput): ArcaService {
 
       // Factura C (tipo 11 - Monotributo) => IVA = 0
       const esFacturaC = cbteTipo === 11;
-      // Factura B (tipo 6 - Responsable No Inscripto) => precio IVA incluido
-      const esFacturaB = cbteTipo === 6 && !esFacturaC;
+      // Factura B con precio IVA incluido (solo para condiciones que lo indican)
+      const esFacturaB = priceIncludesVat(inv.issuerCondition);
       let impIVA = 0;
       let ivaAliquota = { id: 3, percentage: 0 }; // Exento
       let ivaArray: Array<{ Id: number; BaseImp: number; Importe: number }> = [];
@@ -249,7 +135,7 @@ export function createClient(input: CreateClientInput): ArcaService {
         ];
       } else if (!esFacturaC) {
         // Factura A: IVA según condición del receptor
-        ivaAliquota = getIvaAliquota(inv.customer.vatCondition);
+        ivaAliquota = getIvaAliquot(inv.customer.vatCondition, false);
         impIVA = Math.round(impNeto * ivaAliquota.percentage * 100) / 10000;
         ivaArray = [
           {
@@ -278,9 +164,7 @@ export function createClient(input: CreateClientInput): ArcaService {
         ImpTrib: 0,
         MonId: 'PES',
         MonCotiz: 1,
-        CondicionIVAReceptorId: mapVatConditionToReceiverId(
-          inv.customer.vatCondition,
-        ),
+        CondicionIVAReceptorId: getIvaReceiverId(inv.customer.vatCondition),
         Iva: ivaArray,
       };
 

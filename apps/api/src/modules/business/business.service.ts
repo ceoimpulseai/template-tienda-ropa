@@ -2,7 +2,7 @@ import { NotFoundError } from '../../lib/errors.js';
 import { Business } from './business.model.js';
 import type { UpdateBusinessInput } from '@template/shared';
 import { getPermissionsForRole } from '@template/shared';
-import { deriveTenantKey, encryptPem } from '../../lib/arca/crypto.js';
+import { encryptPem, decryptPem } from '../../lib/arca/crypto.js';
 
 export const businessService = {
   async getById(businessId: string) {
@@ -54,9 +54,8 @@ export const businessService = {
 
     // Encrypt PEMs if both provided (Zod validates they come together)
     if (input.certPem && input.keyPem) {
-      const tenantKey = deriveTenantKey(businessId);
-      updateData.arcaCertPem = encryptPem(tenantKey, input.certPem);
-      updateData.arcaPrivateKeyPem = encryptPem(tenantKey, input.keyPem);
+      updateData.arcaCertPem = encryptPem(businessId, input.certPem);
+      updateData.arcaPrivateKeyPem = encryptPem(businessId, input.keyPem);
     }
 
     await business.update(updateData);

@@ -33,7 +33,11 @@ Customer.belongsTo(Business, { foreignKey: 'businessId' });
 Business.hasMany(Sale, { foreignKey: 'businessId' });
 Item.hasMany(Sale, { foreignKey: 'itemId' });
 Branch.hasMany(Sale, { foreignKey: 'branchId' });
-Customer.hasMany(Sale, { foreignKey: 'customerId' });
+Customer.hasMany(Sale, { foreignKey: 'customerId', as: 'sales' });
+Sale.belongsTo(Customer, { foreignKey: 'customerId', as: 'customer' });
+Sale.belongsTo(Item, { foreignKey: 'itemId', as: 'item' });
+Sale.belongsTo(Branch, { foreignKey: 'branchId', as: 'branch' });
+Sale.belongsTo(Business, { foreignKey: 'businessId', as: 'business' });
 
 Business.hasMany(Cost, { foreignKey: 'businessId' });
 

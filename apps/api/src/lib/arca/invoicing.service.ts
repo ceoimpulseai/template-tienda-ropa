@@ -1,12 +1,14 @@
 // Orchestration layer for ARCA invoice emission.
-// Fetches entities, runs preconditions, decrypts PEMs, creates an ephemeral ARCA client,
-// calls the adapter, stores the voucher in a transaction, and updates Sale.arcaStatus.
+// Fetches entities using Sequelize models, runs preconditions, decrypts PEMs,
+// creates an ephemeral ARCA client, calls the adapter, stores the voucher in a transaction,
+// and updates Sale.arcaStatus.
 
 import { randomUUID } from 'node:crypto';
-import { deriveTenantKey, decryptPem, EncryptionError } from './crypto.js';
+import { decryptPem, EncryptionError } from './crypto.js';
 import { createClient, type IssueInvoiceInput } from './factory.js';
-import { sequelize } from '../../config/database.js';
+import { Business, Branch, Customer, Item, Sale, ArcaVoucher } from '../../models/index.js';
 import { ValidationError, ConflictError, NotFoundError } from '../errors.js';
+import { env } from '../../config/env.js';
 
 // ---- Types ----
 
@@ -22,38 +24,13 @@ export interface VoucherRecord {
   emittedAt: Date;
 }
 
-// ---- Entity shapes (from raw query) ----
-
-interface SaleRow {
-  id: string;
-  businessId: string;
-  branchId: string;
-  itemId: string;
-  customerId: string | null;
-  quantity: number;
-  unitPrice: number;
-  arcaStatus: string | null;
-}
-
-interface CustomerRow {
-  id: string;
-  cuit: string | null;
-  dni: string | null;
-  vatCondition: string | null;
-}
-
-interface ItemRow {
-  id: string;
-  name: string;
-}
-
 // ---- Precondition check helpers ----
 
 function checkPreconditions(
-  business: { taxId: string | null; issuerCondition: string | null; arcaCertPem: string | null; arcaPrivateKeyPem: string | null },
+  business: { taxId: string | null; issuerCondition: string | null; arcaCertPem: string | null; arcaPrivateKeyPem: string | null; arcaEnvironment: string },
   branch: { salesPoint: number | null },
   sale: { customerId: string | null; arcaStatus: string | null },
-  customer: { cuit: string | null; dni: string | null } | null,
+  customer: { cuit: string | null; dni: string | null; vatCondition: string | null } | null,
 ): void {
   if (!business.arcaCertPem || !business.arcaPrivateKeyPem) {
     throw new ValidationError('ARCA_NOT_CONFIGURED');
@@ -85,67 +62,35 @@ export async function issueInvoice(
   branchId: string,
   saleId: string,
 ): Promise<VoucherRecord> {
-  // 1. Fetch Business
-  const [bizRows] = await sequelize.query(
-    `SELECT id, "taxId", "issuerCondition", "arcaEnvironment", "arcaCertPem", "arcaPrivateKeyPem"
-     FROM businesses WHERE id = ?`,
-    { replacements: [businessId] },
-  );
-  const business = (bizRows as any[])[0];
+  // 1. Fetch Business using model
+  const business = await Business.findByPk(businessId);
   if (!business) throw new NotFoundError('BUSINESS_NOT_FOUND');
 
-  // 2. Fetch Branch
-  const [branchRows] = await sequelize.query(
-    `SELECT id, "salesPoint" FROM branches WHERE id = ? AND "businessId" = ?`,
-    { replacements: [branchId, businessId] },
-  );
-  const branch = (branchRows as any[])[0];
+  // 2. Fetch Branch using model
+  const branch = await Branch.findOne({
+    where: { id: branchId, businessId },
+  });
   if (!branch) throw new NotFoundError('BRANCH_NOT_FOUND');
 
-  // 3. Fetch Sale + Customer + Item in one joined query
-  const [joinedRows] = await sequelize.query(
-    `SELECT s.id AS sale_id, s."businessId", s."branchId", s."itemId", s."customerId",
-            s.quantity, s."unitPrice", s."arcaStatus",
-            c.id AS customer_id, c.cuit, c.dni, c."vatCondition",
-            i.id AS item_id, i.name AS item_name
-     FROM sales s
-     LEFT JOIN customers c ON c.id = s."customerId"
-     LEFT JOIN items i ON i.id = s."itemId"
-     WHERE s.id = ? AND s."businessId" = ?`,
-    { replacements: [saleId, businessId] },
-  );
-  const row = (joinedRows as any[])[0];
-  if (!row) throw new NotFoundError('SALE_NOT_FOUND');
-
-  const sale: SaleRow = {
-    id: row.sale_id,
-    businessId: row.businessId,
-    branchId: row.branchId,
-    itemId: row.itemId,
-    customerId: row.customerId,
-    quantity: row.quantity,
-    unitPrice: row.unitPrice,
-    arcaStatus: row.arcaStatus,
-  };
-
-  const customer: CustomerRow | null = row.customer_id
-    ? { id: row.customer_id, cuit: row.cuit, dni: row.dni, vatCondition: row.vatCondition }
-    : null;
-
-  const item: ItemRow | null = row.item_id
-    ? { id: row.item_id, name: row.item_name }
-    : null;
+  // 3. Fetch Sale with Customer and Item using model associations
+  const sale = await Sale.findOne({
+    where: { id: saleId, businessId },
+    include: [
+      { model: Customer, as: 'customer', required: false },
+      { model: Item, as: 'item', required: false },
+    ],
+  });
+  if (!sale) throw new NotFoundError('SALE_NOT_FOUND');
 
   // 4. Precondition checks
-  checkPreconditions(business, branch, sale, customer);
+  checkPreconditions(business, branch, sale, sale.customer);
 
   // 5. Decrypt PEMs
   let certPem: string;
   let privateKeyPem: string;
   try {
-    const tenantKey = deriveTenantKey(businessId);
-    certPem = decryptPem(tenantKey, business.arcaCertPem);
-    privateKeyPem = decryptPem(tenantKey, business.arcaPrivateKeyPem);
+    certPem = decryptPem(businessId, business.arcaCertPem);
+    privateKeyPem = decryptPem(businessId, business.arcaPrivateKeyPem);
   } catch (err) {
     if (err instanceof EncryptionError) {
       throw new ValidationError('ENCRYPTION_ERROR');
@@ -156,25 +101,25 @@ export async function issueInvoice(
   // 6. Build input, create client
   const production = business.arcaEnvironment === 'production';
   const client = createClient({
-    cuit: business.taxId.replace(/\D/g, ''),
+    cuit: business.taxId!.replace(/\D/g, ''),
     certPem,
     privateKeyPem,
     production,
   });
 
   const issueInput: IssueInvoiceInput = {
-    cuit: business.taxId.replace(/\D/g, ''),
-    salesPoint: branch.salesPoint,
-    issuerCondition: business.issuerCondition,
+    cuit: business.taxId!.replace(/\D/g, ''),
+    salesPoint: branch.salesPoint!,
+    issuerCondition: business.issuerCondition!,
     customer: {
-      cuit: customer!.cuit?.replace(/\D/g, ''),
-      dni: customer!.dni,
-      vatCondition: customer!.vatCondition ?? 'Consumidor Final',
+      cuit: sale.customer?.cuit?.replace(/\D/g, ''),
+      dni: sale.customer?.dni,
+      vatCondition: sale.customer?.vatCondition ?? 'Consumidor Final',
     },
     invoice: {
       items: [
         {
-          name: item?.name ?? 'Producto',
+          name: sale.item?.name ?? 'Producto',
           quantity: sale.quantity,
           unitPrice: sale.unitPrice,
         },
@@ -183,9 +128,10 @@ export async function issueInvoice(
     idempotencyKey: sale.id,
   };
 
-  // 7. Call adapter with timeout (20s)
+  // 7. Call adapter with timeout (configurable via env)
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 20_000);
+  const timeoutMs = env.ARCA_TIMEOUT_MS;
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   let outcome: import('./factory.js').VoucherResult;
   try {
@@ -200,24 +146,19 @@ export async function issueInvoice(
     clearTimeout(timeout);
   }
 
-// 8. Handle outcome — inside a Sequelize transaction
-  const voucherId = randomUUID();
+  // 8. Handle outcome — inside a Sequelize transaction
   const emittedAt = new Date();
 
-  // conflict: the SDK returned conflict — look up existing voucher
+  // conflict: the SDK returned conflict — look up existing voucher using model
   if (outcome.result === 'conflict') {
-    const [existingRows] = await sequelize.query(
-      `SELECT id, "saleId", result, "arcaVoucherId", "arcaVoucherNumber",
-              "emissionCode", "emissionMessage", "rawResponse", "emittedAt"
-       FROM arca_vouchers WHERE "saleId" = ?`,
-      { replacements: [saleId] },
-    );
-    const existing = (existingRows as any[])[0];
+    const existing = await ArcaVoucher.findOne({
+      where: { saleId },
+    });
     if (existing) {
       return {
         id: existing.id,
         saleId: existing.saleId,
-        result: existing.result,
+        result: existing.result as VoucherRecord['result'],
         arcaVoucherId: existing.arcaVoucherId,
         arcaVoucherNumber: existing.arcaVoucherNumber,
         emissionCode: existing.emissionCode,
@@ -231,78 +172,59 @@ export async function issueInvoice(
   }
 
   // Check if voucher already exists for this sale (for retries on rejected/indeterminate)
-  const [existingRows] = await sequelize.query(
-    `SELECT id, "saleId", result, "arcaVoucherId", "arcaVoucherNumber",
-            "emissionCode", "emissionMessage", "rawResponse", "emittedAt"
-     FROM arca_vouchers WHERE "saleId" = ?`,
-    { replacements: [saleId] },
-  );
-  const existing = (existingRows as any[])[0];
+  const existing = await ArcaVoucher.findOne({
+    where: { saleId },
+  });
 
   // For authorized / rejected / indeterminate: INSERT or UPDATE voucher + UPDATE sale
-  await sequelize.transaction(async (transaction) => {
+  await ArcaVoucher.sequelize!.transaction(async (transaction) => {
     const saleArcaStatus = outcome.result === 'authorized' || outcome.result === 'indeterminate'
       ? outcome.result
       : 'rejected';
 
     if (existing) {
       // UPDATE existing voucher (retry case)
-      await sequelize.query(
-        `UPDATE arca_vouchers
-         SET result = ?, "arcaVoucherId" = ?, "arcaVoucherNumber" = ?,
-             "emissionCode" = ?, "emissionMessage" = ?, "rawResponse" = ?,
-             "emittedAt" = ?, "updatedAt" = CURRENT_TIMESTAMP
-         WHERE "saleId" = ?`,
+      await existing.update(
         {
-          replacements: [
-            outcome.result,
-            outcome.arcaVoucherId,
-            outcome.arcaVoucherNumber,
-            outcome.emissionCode,
-            outcome.emissionMessage,
-            outcome.rawResponse ?? '{}',
-            emittedAt.toISOString(),
-            saleId,
-          ],
-          transaction,
+          result: outcome.result,
+          arcaVoucherId: outcome.arcaVoucherId,
+          arcaVoucherNumber: outcome.arcaVoucherNumber,
+          emissionCode: outcome.emissionCode,
+          emissionMessage: outcome.emissionMessage,
+          rawResponse: outcome.rawResponse ?? '{}',
+          emittedAt,
         },
+        { transaction },
       );
     } else {
       // INSERT new voucher (first attempt)
-      await sequelize.query(
-        `INSERT INTO arca_vouchers
-          (id, "businessId", "saleId", result, "arcaVoucherId", "arcaVoucherNumber",
-           "emissionCode", "emissionMessage", "rawResponse", "idempotencyKey", "emittedAt",
-           "createdAt", "updatedAt")
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
+      await ArcaVoucher.create(
         {
-          replacements: [
-            voucherId,
-            businessId,
-            saleId,
-            outcome.result,
-            outcome.arcaVoucherId,
-            outcome.arcaVoucherNumber,
-            outcome.emissionCode,
-            outcome.emissionMessage,
-            outcome.rawResponse ?? '{}',
-            sale.id,
-            emittedAt.toISOString(),
-          ],
-          transaction,
+          id: randomUUID(),
+          businessId,
+          saleId,
+          result: outcome.result,
+          arcaVoucherId: outcome.arcaVoucherId,
+          arcaVoucherNumber: outcome.arcaVoucherNumber,
+          emissionCode: outcome.emissionCode,
+          emissionMessage: outcome.emissionMessage,
+          rawResponse: outcome.rawResponse ?? '{}',
+          idempotencyKey: sale.id,
+          emittedAt,
         },
+        { transaction },
       );
     }
 
-    // UPDATE Sale.arcaStatus
-    await sequelize.query(
-      `UPDATE sales SET "arcaStatus" = ? WHERE id = ?`,
-      { replacements: [saleArcaStatus, saleId], transaction },
+    // UPDATE Sale.arcaStatus using model
+    await sale.update(
+      { arcaStatus: saleArcaStatus },
+      { transaction },
     );
   });
 
   return {
-    id: voucherId,
+    id: existing?.id ?? randomUUID(),
     saleId,
     result: outcome.result,
     arcaVoucherId: outcome.arcaVoucherId,
