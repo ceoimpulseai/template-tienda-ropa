@@ -2,6 +2,7 @@
 // Uses AES-256-GCM with PBKDF2 key derivation.
 // Each encryption gets a random salt stored in the payload for key derivation.
 // Supports versioned payloads for future master key rotation.
+// Backward compatible with old format (deterministic salt, no version field).
 
 import { pbkdf2Sync, randomBytes, createCipheriv, createDecipheriv } from 'node:crypto';
 import { env } from '../../config/env.js';
@@ -15,9 +16,15 @@ const DIGEST = 'sha256';
 const SALT_PREFIX = 'arca-tenant-key-v1:';
 const CURRENT_VERSION = 1;
 
-interface EncryptedPayload {
+interface EncryptedPayloadV1 {
   version: number;
   salt: string;
+  iv: string;
+  tag: string;
+  ciphertext: string;
+}
+
+interface EncryptedPayloadLegacy {
   iv: string;
   tag: string;
   ciphertext: string;
@@ -30,9 +37,14 @@ export class EncryptionError extends Error {
   }
 }
 
-// Internal key derivation: masterKey + businessId + randomSalt
+// Internal key derivation: masterKey + businessId + salt
 function deriveKey(masterKey: Buffer, businessId: string, salt: string): Buffer {
   return pbkdf2Sync(masterKey, `${SALT_PREFIX}${businessId}:${salt}`, ITERATIONS, KEY_LENGTH, DIGEST);
+}
+
+// Legacy key derivation (deterministic salt based on businessId only)
+function deriveKeyLegacy(masterKey: Buffer, businessId: string): Buffer {
+  return pbkdf2Sync(masterKey, `${SALT_PREFIX}${businessId}`, ITERATIONS, KEY_LENGTH, DIGEST);
 }
 
 /**
@@ -62,17 +74,24 @@ export function encryptPem(businessId: string, pem: string): string {
 
 /**
  * Decrypt a PEM string for a specific business.
- * Reads salt from the stored payload, derives the same key.
+ * Supports both new format (v1 with random salt) and legacy format (deterministic salt).
  * @param businessId — tenant identifier (UUID)
- * @param encrypted — JSON string from encryptPem()
+ * @param encrypted — JSON string from encryptPem() or legacy format
  * @returns decrypted PEM string
  * @throws EncryptionError if decryption fails (tampering, wrong key, corrupted data)
  */
 export function decryptPem(businessId: string, encrypted: string): string {
   try {
-    const { version, salt, iv, tag, ciphertext } = JSON.parse(encrypted) as EncryptedPayload;
+    const parsed = JSON.parse(encrypted);
 
-    // Version check — future: handle different versions for key rotation
+    // Detect legacy format: no version field, has iv/tag/ciphertext directly
+    if (!parsed.version && parsed.iv && parsed.tag && parsed.ciphertext) {
+      return decryptLegacy(businessId, parsed as EncryptedPayloadLegacy);
+    }
+
+    // New format (v1+)
+    const { version, salt, iv, tag, ciphertext } = parsed as EncryptedPayloadV1;
+
     if (version !== CURRENT_VERSION) {
       throw new EncryptionError(`Unsupported encryption version: ${version}`);
     }
@@ -88,4 +107,14 @@ export function decryptPem(businessId: string, encrypted: string): string {
     if (err instanceof EncryptionError) throw err;
     throw new EncryptionError('Failed to decrypt PEM — possible tampering or wrong key', err);
   }
+}
+
+function decryptLegacy(businessId: string, payload: EncryptedPayloadLegacy): string {
+  const masterKey = Buffer.from(env.ARCA_MASTER_KEY, 'hex');
+  const derivedKey = deriveKeyLegacy(masterKey, businessId);
+  const decipher = createDecipheriv(ALGORITHM, derivedKey, Buffer.from(payload.iv, 'hex'));
+  decipher.setAuthTag(Buffer.from(payload.tag, 'hex'));
+  let pem = decipher.update(payload.ciphertext, 'hex', 'utf-8');
+  pem += decipher.final('utf-8');
+  return pem;
 }
