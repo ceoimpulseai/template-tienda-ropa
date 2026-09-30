@@ -1,5 +1,5 @@
 // Ticket storage adapter for @arcasdk/core — manages WSAA access tickets (TA).
-// Implements the ITicketStoragePort interface expected by the SDK.
+// Implements the full ITicketStoragePort interface expected by the SDK.
 // Single responsibility: cache and validate tickets per service.
 
 import { sequelize } from '../../config/database.js';
@@ -9,6 +9,15 @@ export interface AccessTicket {
   sign: string;
   generationTime: string;
   expirationTime: string;
+}
+
+// Extended ticket with all methods the SDK expects
+export interface SdkTicket extends AccessTicket {
+  isExpired: () => boolean;
+  getToken: () => string;
+  getSign: () => string;
+  getExpirationTime: () => Date;
+  getGenerationTime: () => Date;
 }
 
 // Check real expiration — ticket is expired if expirationTime <= now
@@ -30,9 +39,9 @@ export const ticketStorage = {
     );
   },
 
-// Get a valid (non-expired) ticket for the given service
+  // Get a valid (non-expired) ticket for the given service
   // Returns null if no ticket exists, if expired, or if token/sign are missing
-  async get(serviceName: ServiceName): Promise<AccessTicket | null> {
+  async get(serviceName: ServiceName): Promise<SdkTicket | null> {
     const [rows] = await sequelize.query(
       'SELECT value FROM arca_store WHERE id = ?',
       { replacements: [serviceName] },
@@ -48,12 +57,16 @@ export const ticketStorage = {
     // Return null if token or sign are missing/empty — SDK will re-authenticate
     if (!ticket.token || !ticket.sign) return null;
 
-    // Return ticket with isExpired(), getToken() and getSign() methods that SDK requires
-    // Uses real expiration check so SDK can call it directly
+    const expirationTime = new Date(ticket.expirationTime);
+    const generationTime = new Date(ticket.generationTime);
+
+    // Return ticket with ALL methods the SDK expects
     return Object.assign(ticket, {
-      isExpired: () => isTicketExpired(ticket),
+      isExpired: () => expirationTime <= new Date(),
       getToken: () => ticket.token,
       getSign: () => ticket.sign,
+      getExpirationTime: () => expirationTime,
+      getGenerationTime: () => generationTime,
     });
   },
 
