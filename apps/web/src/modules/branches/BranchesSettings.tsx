@@ -14,6 +14,8 @@ import { Can } from '../../components/Can';
 export function BranchesSettings() {
   const { data, loading, refetch } = useApi<Branch[]>('/branches');
   const [name, setName] = useState('');
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editSalesPoint, setEditSalesPoint] = useState('');
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -25,6 +27,28 @@ export function BranchesSettings() {
   async function handleRemove(id: string) {
     await apiFetch(`/branches/${id}`, { method: 'DELETE' });
     refetch();
+  }
+
+  async function handleEditStart(branch: Branch) {
+    setEditingId(branch.id);
+    setEditSalesPoint(branch.salesPoint?.toString() ?? '');
+  }
+
+  async function handleEditSave(branchId: string) {
+    const salesPoint = parseInt(editSalesPoint, 10);
+    if (isNaN(salesPoint) || salesPoint < 1) return;
+    await apiFetch(`/branches/${branchId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ salesPoint }),
+    });
+    setEditingId(null);
+    setEditSalesPoint('');
+    refetch();
+  }
+
+  async function handleEditCancel() {
+    setEditingId(null);
+    setEditSalesPoint('');
   }
 
   return (
@@ -50,6 +74,36 @@ export function BranchesSettings() {
             columns={[
               { header: 'Nombre', render: (b) => b.name },
               { header: 'Default', render: (b) => (b.isDefault ? <Badge tone="success">Sí</Badge> : null) },
+              {
+                header: 'Punto de Venta',
+                render: (b) =>
+                  editingId === b.id ? (
+                    <div className="flex gap-2 items-center">
+                      <Input
+                        type="number"
+                        min="1"
+                        value={editSalesPoint}
+                        onChange={(e) => setEditSalesPoint(e.target.value)}
+                        className="w-24"
+                        autoFocus
+                      />
+                      <Button size="sm" onClick={() => handleEditSave(b.id)}>Guardar</Button>
+                      <Button size="sm" variant="secondary" onClick={handleEditCancel}>Cancelar</Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span>{b.salesPoint ?? <span className="text-text-muted">—</span>}</span>
+                      <Can permission="branches:update">
+                        <button
+                          onClick={() => handleEditStart(b)}
+                          className="text-xs text-primary hover:underline"
+                        >
+                          {b.salesPoint ? 'Editar' : 'Agregar'}
+                        </button>
+                      </Can>
+                    </div>
+                  ),
+              },
               {
                 header: '',
                 render: (b) =>

@@ -1,6 +1,6 @@
 // EJEMPLO: adaptar a la lógica del rubro concreto.
 import { sequelize } from '../../../config/database.js';
-import { ConflictError } from '../../../lib/errors.js';
+import { ConflictError, NotFoundError } from '../../../lib/errors.js';
 import { itemRepository } from '../../items/item.repository.js';
 import { saleRepository } from './sale.repository.js';
 import type { CreateSaleInput } from '@template/shared';
@@ -13,7 +13,7 @@ export const saleService = {
   async create(businessId: string, branchId: string, input: CreateSaleInput) {
     return sequelize.transaction(async (transaction) => {
       const item = await itemRepository.findOne(businessId, input.itemId, { transaction });
-      if (!item) throw new ConflictError('ITEM_NOT_FOUND');
+      if (!item) throw new NotFoundError('ITEM_NOT_FOUND');
       if (item.stock < input.quantity) throw new ConflictError('INSUFFICIENT_STOCK');
 
       const isInternal = input.isInternal ?? false;

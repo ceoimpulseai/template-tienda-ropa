@@ -63,7 +63,7 @@ const ticketStorage: ITicketStoragePort = {
   async save(ticket: AccessTicket, serviceName: string): Promise<void> {
     const value = JSON.stringify(ticket);
     await sequelize.query(
-      `INSERT OR REPLACE INTO arca_store (id, value, created_at) VALUES (?, ?, datetime('now'))`,
+      `INSERT INTO arca_store (id, value, created_at) VALUES (?, ?, CURRENT_TIMESTAMP) ON CONFLICT (id) DO UPDATE SET value = EXCLUDED.value, created_at = CURRENT_TIMESTAMP`,
       { replacements: [serviceName, value] },
     );
   },
@@ -74,7 +74,16 @@ const ticketStorage: ITicketStoragePort = {
       { replacements: [serviceName] },
     );
     const row = (rows as any[])[0];
-    return row ? (JSON.parse(row.value) as AccessTicket) : null;
+    if (!row) return null;
+    const ticket = JSON.parse(row.value) as AccessTicket;
+    // SDK expects ticket to have isExpired() method - add it
+    // Also validate expiration and return null if expired (SDK will re-auth)
+    const expired = new Date(ticket.expirationTime) <= new Date();
+    if (expired) return null;
+    return {
+      ...ticket,
+      isExpired: () => true,
+    };
   },
 
   async delete(serviceName: string): Promise<void> {
@@ -111,9 +120,18 @@ function mapIssuerConditionToVoucherType(issuerCondition: string): number {
 
 const IVA_ALIQUOTAS: Record<string, { id: number; percentage: number }> = {
   'IVA Responsable Inscripto': { id: 5, percentage: 21 },
-  'Responsable Monotributo': { id: 5, percentage: 21 },
-  'Consumidor Final': { id: 5, percentage: 21 },
+  'IVA Responsable No Inscripto': { id: 5, percentage: 21 },
   'IVA Sujeto Exento': { id: 3, percentage: 0 },
+  'Consumidor Final': { id: 5, percentage: 21 },
+  'Responsable Monotributo': { id: 5, percentage: 21 },
+  'Sujeto No Categorizado': { id: 5, percentage: 21 },
+  'Proveedor del Exterior': { id: 5, percentage: 21 },
+  'Cliente del Exterior': { id: 3, percentage: 0 },
+  'Liberado - Ley 19.640': { id: 3, percentage: 0 },
+  'IVA Responsable Inscripto - Agente de Percepción': { id: 5, percentage: 21 },
+  'Pequeño Contribuyente Eventual': { id: 5, percentage: 21 },
+  'Monotributista Social': { id: 5, percentage: 21 },
+  'Pequeño Contribuyente Eventual Social': { id: 5, percentage: 21 },
   'Exento': { id: 3, percentage: 0 },
 };
 
@@ -201,13 +219,47 @@ export function createClient(input: CreateClientInput): ArcaService {
       );
 
       // Calculate amounts
-      const impNeto = inv.invoice.items.reduce(
+      let impNeto = inv.invoice.items.reduce(
         (sum, item) => sum + item.quantity * item.unitPrice,
         0,
       );
 
-      const ivaAliquota = getIvaAliquota(inv.customer.vatCondition);
-      const impIVA = Math.round(impNeto * ivaAliquota.percentage * 100) / 10000;
+      // Factura C (tipo 11 - Monotributo) => IVA = 0
+      const esFacturaC = cbteTipo === 11;
+      // Factura B (tipo 6 - Responsable No Inscripto) => precio IVA incluido
+      const esFacturaB = cbteTipo === 6 && !esFacturaC;
+      let impIVA = 0;
+      let ivaAliquota = { id: 3, percentage: 0 }; // Exento
+      let ivaArray: Array<{ Id: number; BaseImp: number; Importe: number }> = [];
+
+      if (esFacturaB) {
+        // Factura B: precio incluye IVA => extraer neto
+        const ivaFactor = 0.21;
+        const ivaId = 5;
+        const impNetoConIva = impNeto;
+        impNeto = Math.round((impNetoConIva / (1 + ivaFactor)) * 100) / 100;
+        impIVA = Math.round((impNetoConIva - impNeto) * 100) / 100;
+        ivaAliquota = { id: ivaId, percentage: 21 };
+        ivaArray = [
+          {
+            Id: ivaAliquota.id,
+            BaseImp: impNeto,
+            Importe: impIVA,
+          },
+        ];
+      } else if (!esFacturaC) {
+        // Factura A: IVA según condición del receptor
+        ivaAliquota = getIvaAliquota(inv.customer.vatCondition);
+        impIVA = Math.round(impNeto * ivaAliquota.percentage * 100) / 10000;
+        ivaArray = [
+          {
+            Id: ivaAliquota.id,
+            BaseImp: impNeto,
+            Importe: impIVA,
+          },
+        ];
+      }
+
       const impTotal = Math.round((impNeto + impIVA) * 100) / 100;
 
       const dto = {
@@ -229,13 +281,7 @@ export function createClient(input: CreateClientInput): ArcaService {
         CondicionIVAReceptorId: mapVatConditionToReceiverId(
           inv.customer.vatCondition,
         ),
-        Iva: [
-          {
-            Id: ivaAliquota.id,
-            BaseImp: impNeto,
-            Importe: impIVA,
-          },
-        ],
+        Iva: ivaArray,
       };
 
       try {
@@ -243,13 +289,25 @@ export function createClient(input: CreateClientInput): ArcaService {
           await arca.electronicBillingService.createNextVoucher(dto);
         return mapSdkResponseToVoucherResult(response);
       } catch (err: any) {
+        const safeError = {
+          name: err?.name,
+          message: err?.message,
+          code: err?.code,
+          cause: err?.cause instanceof Error ? err.cause.message : undefined,
+        };
+        let rawResponse: string;
+        try {
+          rawResponse = JSON.stringify({ error: safeError });
+        } catch {
+          rawResponse = '{"error": "non-serializable"}';
+        }
         return {
           result: 'rejected',
           arcaVoucherId: null,
           arcaVoucherNumber: null,
           emissionCode: err.code || 'SDK_ERROR',
           emissionMessage: err.message || 'Unknown SDK error',
-          rawResponse: JSON.stringify({ error: err }),
+          rawResponse,
         };
       }
     },

@@ -87,7 +87,7 @@ export async function issueInvoice(
 ): Promise<VoucherRecord> {
   // 1. Fetch Business
   const [bizRows] = await sequelize.query(
-    `SELECT id, taxId, issuerCondition, arcaEnvironment, arcaCertPem, arcaPrivateKeyPem
+    `SELECT id, "taxId", "issuerCondition", "arcaEnvironment", "arcaCertPem", "arcaPrivateKeyPem"
      FROM businesses WHERE id = ?`,
     { replacements: [businessId] },
   );
@@ -200,7 +200,7 @@ export async function issueInvoice(
     clearTimeout(timeout);
   }
 
-  // 8. Handle outcome — inside a Sequelize transaction
+// 8. Handle outcome — inside a Sequelize transaction
   const voucherId = randomUUID();
   const emittedAt = new Date();
 
@@ -230,36 +230,69 @@ export async function issueInvoice(
     outcome.result = 'indeterminate';
   }
 
-  // For authorized / rejected / indeterminate: INSERT voucher + UPDATE sale
+  // Check if voucher already exists for this sale (for retries on rejected/indeterminate)
+  const [existingRows] = await sequelize.query(
+    `SELECT id, "saleId", result, "arcaVoucherId", "arcaVoucherNumber",
+            "emissionCode", "emissionMessage", "rawResponse", "emittedAt"
+     FROM arca_vouchers WHERE "saleId" = ?`,
+    { replacements: [saleId] },
+  );
+  const existing = (existingRows as any[])[0];
+
+  // For authorized / rejected / indeterminate: INSERT or UPDATE voucher + UPDATE sale
   await sequelize.transaction(async (transaction) => {
     const saleArcaStatus = outcome.result === 'authorized' || outcome.result === 'indeterminate'
       ? outcome.result
       : 'rejected';
 
-    // INSERT arca_vouchers
-    await sequelize.query(
-      `INSERT INTO arca_vouchers
-        (id, "businessId", "saleId", result, "arcaVoucherId", "arcaVoucherNumber",
-         "emissionCode", "emissionMessage", "rawResponse", "idempotencyKey", "emittedAt",
-         "createdAt", "updatedAt")
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
-      {
-        replacements: [
-          voucherId,
-          businessId,
-          saleId,
-          outcome.result,
-          outcome.arcaVoucherId,
-          outcome.arcaVoucherNumber,
-          outcome.emissionCode,
-          outcome.emissionMessage,
-          outcome.rawResponse ?? '{}',
-          sale.id,
-          emittedAt.toISOString(),
-        ],
-        transaction,
-      },
-    );
+    if (existing) {
+      // UPDATE existing voucher (retry case)
+      await sequelize.query(
+        `UPDATE arca_vouchers
+         SET result = ?, "arcaVoucherId" = ?, "arcaVoucherNumber" = ?,
+             "emissionCode" = ?, "emissionMessage" = ?, "rawResponse" = ?,
+             "emittedAt" = ?, "updatedAt" = CURRENT_TIMESTAMP
+         WHERE "saleId" = ?`,
+        {
+          replacements: [
+            outcome.result,
+            outcome.arcaVoucherId,
+            outcome.arcaVoucherNumber,
+            outcome.emissionCode,
+            outcome.emissionMessage,
+            outcome.rawResponse ?? '{}',
+            emittedAt.toISOString(),
+            saleId,
+          ],
+          transaction,
+        },
+      );
+    } else {
+      // INSERT new voucher (first attempt)
+      await sequelize.query(
+        `INSERT INTO arca_vouchers
+          (id, "businessId", "saleId", result, "arcaVoucherId", "arcaVoucherNumber",
+           "emissionCode", "emissionMessage", "rawResponse", "idempotencyKey", "emittedAt",
+           "createdAt", "updatedAt")
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
+        {
+          replacements: [
+            voucherId,
+            businessId,
+            saleId,
+            outcome.result,
+            outcome.arcaVoucherId,
+            outcome.arcaVoucherNumber,
+            outcome.emissionCode,
+            outcome.emissionMessage,
+            outcome.rawResponse ?? '{}',
+            sale.id,
+            emittedAt.toISOString(),
+          ],
+          transaction,
+        },
+      );
+    }
 
     // UPDATE Sale.arcaStatus
     await sequelize.query(

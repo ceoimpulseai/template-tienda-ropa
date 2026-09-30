@@ -247,13 +247,21 @@ npm run test -- apps/api/src/modules/arca/arca.service.test.ts
 
 ## Certificados de Prueba (Homologación)
 
-Para testing en homologación ARCA:
+Para testing en homologación ARCA, se usa **WSASS** (Autoservicio de Acceso a APIs de Homologación):
 
-1. Descargar certificados de prueba desde: https://www.afip.gob.ar/fe/homo/
-2. Usar CUIT de prueba: `20222222227` (o similar)
-3. Clave privada de prueba incluida en el paquete AFIP
+1. Ingresar a WSASS con Clave Fiscal: https://wsass-homo.afip.gov.ar/wsass/portal/main.aspx
+2. Generar CSR localmente con OpenSSL:
+   ```bash
+   openssl genrsa -out MiClavePrivada.key 2048
+   openssl req -new -key MiClavePrivada.key \
+     -subj "/C=AR/O=TuEmpresa/CN=TuSistema/serialNumber=CUIT 20222222227" \
+     -out MiPedidoCSR.csr
+   ```
+3. Subir el CSR en WSASS → "Formulario para obtener el certificado por primera vez"
+4. Solicitar acceso al servicio **wsfev1** en "Gestión de accesos a servicios"
+5. Descargar certificado y usar junto con la clave privada en el sistema
 
-> **Importante**: Los certificados de homologación **no sirven para producción**. Para producción usar certificados reales de AFIP.
+> **Importante**: Los certificados de homologación **no sirven para producción**. Para producción usar certificados reales de AFIP (ver `docs/ARCA_CREDENTIALS_SETUP.md`).
 
 ---
 
@@ -284,8 +292,8 @@ ARCA_MASTER_KEY=0000000000000000000000000000000000000000000000000000000000000000
 - Verificar estado: `GET /api/sales/<ID>` → revisar `arcaStatus`
 
 ### Timeout frecuente (ARCA_TIMEOUT)
-- Verificar conectividad a `wswhomo.afip.gov.ar` (homologación)
-- En producción: `wsfe.afip.gov.ar`
+- Verificar conectividad a `https://wswhomo.afip.gov.ar/wsfev1/service.asmx` (homologación)
+- En producción: `https://servicios1.afip.gov.ar/wsfev1/service.asmx`
 - Aumentar timeout en `invoicing.service.ts` si necesario
 
 ---
@@ -319,6 +327,13 @@ created_at TIMESTAMP
 ## Referencias
 
 - **SDK usado**: `@arcasdk/core` v2.x (https://github.com/ralcorta/arcasdk)
-- **Documentación ARCA**: https://www.afip.gob.ar/fe/
+- **Portal ARCA Factura Electrónica**: https://www.afip.gob.ar/fe/
+- **Entorno de prueba (Ayuda)**: https://www.afip.gob.ar/fe/ayuda/entorno-prueba.asp
+- **Homologación externa (manuales)**: https://www.afip.gob.ar/fe/ayuda/homologacion_externa.asp
+- **WSASS (Autoservicio homologación)**: https://wsass-homo.afip.gov.ar/wsass/portal/main.aspx
+- **WSAA homo**: https://wsaahomo.afip.gov.ar/ws/services/LoginCms
+- **WSAA prod**: https://wsaa.afip.gov.ar/ws/services/LoginCms
+- **WSFE homo**: https://wswhomo.afip.gov.ar/wsfev1/service.asmx
+- **WSFE prod**: https://servicios1.afip.gov.ar/wsfev1/service.asmx
 - **Specs SDD**: `openspec/changes/archive/2026-09-29-arca-multitenant-integration/`
 - **Código**: `apps/api/src/lib/arca/`, `apps/api/src/modules/arca/`

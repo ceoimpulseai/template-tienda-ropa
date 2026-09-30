@@ -40,7 +40,11 @@ export const arcaController = {
         req.auth!.branchId!,
         id,
       );
-      res.json(voucher);
+      if (voucher.result === 'rejected') {
+        res.status(422).json(voucher);
+      } else {
+        res.json(voucher);
+      }
     } catch (err) {
       next(err);
     }

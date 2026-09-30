@@ -9,6 +9,18 @@ import { errorHandler } from './middleware/errorHandler.js';
 
 await sequelize.sync();
 
+// Ensure arca_store table exists (used by ARCA SDK ticket storage)
+await sequelize.query(`
+  CREATE TABLE IF NOT EXISTS arca_store (
+    id TEXT PRIMARY KEY,
+    value TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
+// Clear corrupted WSAA ticket cache (arca_store) on startup to avoid "isExpired is not a function"
+await sequelize.query(`DELETE FROM arca_store`);
+
 if (env.NODE_ENV !== 'production') {
   const { runSeeds } = await import('./seed/index.js');
   await runSeeds();

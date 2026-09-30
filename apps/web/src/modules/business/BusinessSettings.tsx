@@ -127,7 +127,7 @@ export function BusinessSettings() {
       await apiFetch('/business/arca', {
         method: 'PUT',
         body: JSON.stringify({
-          taxId: arcaForm.taxId.replace(/\D/g, ''),
+          cuit: arcaForm.taxId.replace(/\D/g, ''),
           issuerCondition: arcaForm.issuerCondition,
           arcaEnvironment: arcaForm.arcaEnvironment,
           certPem: arcaForm.certPem || undefined,

@@ -9,4 +9,5 @@ export const branchRoutes = Router();
 branchRoutes.use(requireAuth, requireBusiness);
 branchRoutes.get('/', requirePermission('branches:read'), branchController.list);
 branchRoutes.post('/', requirePermission('branches:create'), branchController.create);
+branchRoutes.put('/:id', requirePermission('branches:update'), branchController.update);
 branchRoutes.delete('/:id', requirePermission('branches:delete'), branchController.remove);

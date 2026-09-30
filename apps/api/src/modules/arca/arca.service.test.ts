@@ -325,7 +325,7 @@ describe('ARCA routes', () => {
         .set('X-Test-User-Id', userId);
 
       expect(res.status).toBe(404);
-      expect(res.body).toMatchObject({ error: 'SALE_NOT_FOUND' });
+      expect(res.body).toMatchObject({ success: false, error: { code: 'SALE_NOT_FOUND' } });
     });
 
     it('returns 404 when sale belongs to different business', async () => {
@@ -349,7 +349,7 @@ describe('ARCA routes', () => {
         .set('X-Test-User-Id', userId);
 
       expect(res.status).toBe(404);
-      expect(res.body).toMatchObject({ error: 'SALE_NOT_FOUND' });
+      expect(res.body).toMatchObject({ success: false, error: { code: 'SALE_NOT_FOUND' } });
     });
 
     it('issues invoice successfully and returns voucher', async () => {
@@ -405,7 +405,7 @@ describe('ARCA routes', () => {
         .set('X-Test-User-Id', userId);
 
       expect(res.status).toBe(400);
-      expect(res.body).toMatchObject({ error: 'ARCA_NOT_CONFIGURED' });
+      expect(res.body).toMatchObject({ success: false, error: { code: 'ARCA_NOT_CONFIGURED' } });
     });
 
     it('returns error when sale already emitted (authorized)', async () => {
@@ -421,7 +421,7 @@ describe('ARCA routes', () => {
         .set('X-Test-User-Id', userId);
 
       expect(res.status).toBe(409);
-      expect(res.body).toMatchObject({ error: 'SALE_ALREADY_EMITTED' });
+      expect(res.body).toMatchObject({ success: false, error: { code: 'SALE_ALREADY_EMITTED' } });
     });
   });
 
@@ -441,7 +441,7 @@ describe('ARCA routes', () => {
         .set('X-Test-User-Id', userId);
 
       expect(res.status).toBe(404);
-      expect(res.body).toMatchObject({ error: 'ARCA_VOUCHER_NOT_FOUND' });
+      expect(res.body).toMatchObject({ success: false, error: { code: 'ARCA_VOUCHER_NOT_FOUND' } });
     });
 
     it('returns voucher when it exists', async () => {

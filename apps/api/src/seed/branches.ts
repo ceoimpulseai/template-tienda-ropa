@@ -6,12 +6,14 @@ const DEMO_BRANCHES = [
     businessId: 'b2c3d4e5-f6a7-8901-bcde-f23456789012',
     name: 'Sucursal Principal',
     isDefault: true,
+    salesPoint: 1,
   },
   {
     id: 'd4e5f6a7-b8c9-0123-def0-123456789012',
     businessId: 'b2c3d4e5-f6a7-8901-bcde-f23456789012',
     name: 'Sucursal Norte',
     isDefault: false,
+    salesPoint: 2,
   },
 ];
 
@@ -25,7 +27,13 @@ export async function seedBranches() {
       await Branch.create(branch);
       console.log(`Branch created: ${branch.name}`);
     } else {
-      console.log(`Branch already exists: ${branch.name}`);
+      // Update existing branch with salesPoint if missing
+      if (existing.salesPoint == null && branch.salesPoint != null) {
+        await existing.update({ salesPoint: branch.salesPoint });
+        console.log(`Branch updated with salesPoint: ${branch.name}`);
+      } else {
+        console.log(`Branch already exists: ${existing.name}`);
+      }
     }
   }
 

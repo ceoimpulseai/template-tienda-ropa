@@ -1,5 +1,5 @@
 // EJEMPLO: adaptar a la lógica del rubro concreto.
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import type { FormEvent } from 'react';
 import { Card } from '../../../ui/Card';
 import { Button } from '../../../ui/Button';
@@ -10,7 +10,7 @@ import { Badge } from '../../../ui/Badge';
 import { Modal } from '../../../ui/Modal';
 import { PageHeader } from '../../../components/PageHeader';
 import { useApi } from '../../../lib/useApi';
-import { apiFetch } from '../../../lib/apiFetch';
+import { apiFetch, ApiError } from '../../../lib/apiFetch';
 import type { Item, Sale, Customer } from '@template/shared';
 import { Can } from '../../../components/Can';
 
@@ -29,6 +29,13 @@ const ARCA_ERROR_MESSAGES: Record<string, string> = {
   SALE_ALREADY_EMITTED: 'Esta venta ya fue facturada.',
   ARCA_TIMEOUT: 'ARCA no respondió. Reintentá en unos segundos.',
 };
+
+function handleApiError(err: unknown): string {
+  if (err instanceof ApiError) {
+    return ARCA_ERROR_MESSAGES[err.code] ?? err.message;
+  }
+  return err instanceof Error ? err.message : 'Error inesperado';
+}
 
 interface IssueResultModalProps {
   open: boolean;
@@ -110,8 +117,7 @@ export function SalesPage() {
       });
       refetch();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error al facturar';
-      const friendlyMessage = ARCA_ERROR_MESSAGES[message] ?? message;
+      const friendlyMessage = handleApiError(err);
       setIssueModal({ open: true, error: friendlyMessage });
     } finally {
       setIssuingId(null);
@@ -148,8 +154,7 @@ export function SalesPage() {
         });
         refetch();
       } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : 'Error al facturar';
-        const friendlyMessage = ARCA_ERROR_MESSAGES[message] ?? message;
+        const friendlyMessage = handleApiError(err);
         setIssueModal({ open: true, error: friendlyMessage });
       } finally {
         setIssuingId(null);

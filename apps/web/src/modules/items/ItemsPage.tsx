@@ -56,7 +56,7 @@ export function ItemsPage() {
       />
 
       <Card>
-        {error && <p className="mb-4 text-sm text-danger">{error}</p>}
+        {error && <p className="mb-4 text-sm text-danger">{error.message}</p>}
 
       {loading ? (
         <p className="text-text-muted">Cargando…</p>

@@ -3,6 +3,7 @@ export const PERMISSIONS = [
   'business:update',
   'branches:read',
   'branches:create',
+  'branches:update',
   'branches:delete',
   'team:read',
   'team:invite',
@@ -44,7 +45,7 @@ export function getAllPermissions(): Permission[] {
 
 export const PERMISSION_GROUPS = {
   business: ['business:read', 'business:update'],
-  branches: ['branches:read', 'branches:create', 'branches:delete'],
+  branches: ['branches:read', 'branches:create', 'branches:update', 'branches:delete'],
   team: ['team:read', 'team:invite', 'team:remove'],
   items: ['items:read', 'items:create', 'items:update', 'items:delete'],
   customers: ['customers:read', 'customers:create', 'customers:delete'],

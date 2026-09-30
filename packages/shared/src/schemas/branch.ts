@@ -11,3 +11,6 @@ export type Branch = z.infer<typeof branchSchema>;
 
 export const createBranchSchema = branchSchema.pick({ name: true });
 export type CreateBranchInput = z.infer<typeof createBranchSchema>;
+
+export const updateBranchSchema = branchSchema.pick({ salesPoint: true }).partial();
+export type UpdateBranchInput = z.infer<typeof updateBranchSchema>;
