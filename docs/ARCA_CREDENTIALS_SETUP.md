@@ -234,10 +234,101 @@ Para facturar, el cliente necesita:
 | `INVALID_ISSUER_CONDITION` | Condición IVA mal escrita | Copiar valor exacto de la lista |
 | `ARCA_TIMEOUT` | AFIP no responde | Reintentar (es idempotente por saleId) |
 | `ENCRYPTION_ERROR` | ARCA_MASTER_KEY cambiada | Verificar .env coincide con BD |
+| `cms.sign.invalid` | Firma CMS inválida / algoritmo no soportado | Ver abajo (§11) |
+| `alreadyAuthenticated` | TA vigente en AFIP (12h) | Esperar o limpiar `arca_store` (ver §11) |
+| `notAuthorized` | CUIT sin permiso wsfe | Autorizar `wsfe` en WSASS para ese CUIT |
 
 ---
 
-## 11. Variables de Entorno Requeridas
+## 11. Troubleshooting Avanzado: Errores de Certificados
+
+### `cms.sign.invalid: Firma inválida o algoritmo no soportado`
+
+**Significado**: AFIP no puede validar la firma CMS que genera el SDK con tu certificado/clave.
+
+**Checklist de verificación (ejecutar en orden)**:
+
+```bash
+# 1. Verificar que el certificado es un CERTIFICADO firmado (no CSR)
+openssl x509 -in certificate.pem -noout -subject
+# Debe mostrar: subject=... serialNumber=CUIT XXXXXXXXXXX
+# Si error "unable to load certificate" → es un CSR, no el certificado firmado
+
+# 2. Verificar que clave privada matchea el certificado (MD5 idénticos)
+openssl x509 -noout -modulus -in certificate.pem | openssl md5
+openssl rsa -noout -modulus -in MiClavePrivada.key | openssl md5
+# AMBOS MD5 DEBEN SER IDÉNTICOS
+
+# 3. Si matchean, convertir clave a PKCS#8 (requerido por AFIP)
+openssl pkcs8 -topk8 -inform PEM -in MiClavePrivada.key -out MiClavePrivada_pkcs8.pem -nocrypt
+# Usar MiClavePrivada_pkcs8.pem en el frontend
+
+# 4. Verificar formato PEM correcto
+head -1 certificate.pem
+# Debe: -----BEGIN CERTIFICATE-----
+head -1 MiClavePrivada_pkcs8.pem
+# Debe: -----BEGIN PRIVATE KEY----- (NO "RSA PRIVATE KEY")
+```
+
+**Causas comunes**:
+- Subiste el **CSR** (`MiPedidoCSR.csr`) en vez del certificado firmado por AFIP (`certificado.crt`)
+- La clave privada es **PKCS#1** (`-----BEGIN RSA PRIVATE KEY-----`) en vez de **PKCS#8** (`-----BEGIN PRIVATE KEY-----`)
+- El certificado que bajaste de WSASS está en formato **DER** (`.cer`), convertí a PEM:
+  ```bash
+  openssl x509 -inform der -in certificado.cer -out certificate.pem
+  ```
+
+---
+
+### `alreadyAuthenticated: El CEE ya posee un TA valido`
+
+**Significado**: AFIP ya emitió un Ticket de Acceso (TA) válido para ese certificado (dura ~12h).
+
+**Soluciones**:
+1. **Esperar a que expire** (~12h desde último login)
+2. **Limpiar cache local** (fuerza nuevo login):
+   ```bash
+   cd apps/api
+   npx tsx -e "(async () => { const { sequelize } = await import('./src/config/database.js'); await sequelize.query('DELETE FROM arca_store'); await sequelize.close(); console.log('OK'); })()"
+   ```
+3. **El SDK ahora maneja esto automáticamente** con `ticketStorage` (mutex + validación), pero si persiste, limpiá la BD.
+
+---
+
+### `notAuthorized: Computador no autorizado a acceder al servicio`
+
+**Significado**: El CUIT del certificado no tiene permiso para `wsfe` (Factura Electrónica).
+
+**Solución**:
+1. Entrar a **WSASS homologación**: https://wsass-homo.afip.gov.ar/wsass/portal/main.aspx
+2. **Gestión de accesos a servicios** → "Formulario de solicitud de autorización de acceso a servicio"
+3. Seleccionar: **`wsfe` - Factura Electrónica (Homologación)**
+4. Confirmar para el CUIT del certificado
+5. En homologación suele ser **instantáneo**
+
+**Verificación**: El servicio en WSASS se lista como **`wsfe` - Factura Electrónica** (no `wsfev1`). `wsfev1` es el nombre interno del endpoint SOAP.
+
+---
+
+### Verificación rápida CUIT/Certificado
+
+```bash
+# CUIT en certificado
+openssl x509 -in certificate.pem -noout -subject
+# Debe mostrar: serialNumber=CUIT 20416986925 (tu CUIT homologación)
+
+# Verificar que clave privada = certificado
+openssl x509 -noout -modulus -in certificate.pem | openssl md5
+openssl rsa -noout -modulus -in MiClavePrivada.key | openssl md5
+# MD5 idénticos = OK
+
+# CUIT en frontend = CUIT en certificado = CUIT autorizado en WSASS
+# Los 3 DEBEN SER IGUALES
+```
+
+---
+
+## 12. Variables de Entorno Requeridas
 
 Archivo `apps/api/.env`:
 
