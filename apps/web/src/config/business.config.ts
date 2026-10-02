@@ -61,6 +61,7 @@ const nav: NavEntry[] = [
   { to: '/financials', label: 'Financiero', moduleKey: 'financials', permission: 'financials:read' },
   { to: '/suppliers', label: 'Proveedores', permission: 'suppliers:read' },
   { to: '/customers', label: 'Clientes', permission: 'customers:read' },
+  { to: '/employees', label: 'Empleados', permission: 'employees:read' },
   { to: '/team', label: 'Equipo', permission: 'team:read' },
   { to: '/business', label: 'Negocio', permission: 'business:read' },
   { to: '/branches', label: terminology.branchPlural, permission: 'branches:read' },

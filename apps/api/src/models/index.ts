@@ -8,6 +8,7 @@ import { Purchase } from '../modules/_example/purchases/purchase.model.js';
 import { Sale } from '../modules/_example/sales/sale.model.js';
 import { Cost } from '../modules/_example/costs/cost.model.js';
 import { ArcaVoucher } from '../modules/arca/arca-voucher.model.js';
+import { Employee, Schedule } from '../modules/employees/employee.model.js';
 
 Business.hasMany(Branch, { foreignKey: 'businessId' });
 Branch.belongsTo(Business, { foreignKey: 'businessId' });
@@ -46,4 +47,10 @@ ArcaVoucher.belongsTo(Business, { foreignKey: 'businessId' });
 Sale.hasOne(ArcaVoucher, { foreignKey: 'saleId' });
 ArcaVoucher.belongsTo(Sale, { foreignKey: 'saleId' });
 
-export { Business, Branch, BusinessMember, Customer, Item, Supplier, Purchase, Sale, Cost, ArcaVoucher };
+Business.hasMany(Employee, { foreignKey: 'businessId' });
+Employee.belongsTo(Business, { foreignKey: 'businessId' });
+
+Employee.hasMany(Schedule, { foreignKey: 'employeeId', as: 'schedules' });
+Schedule.belongsTo(Employee, { foreignKey: 'employeeId', as: 'employee' });
+
+export { Business, Branch, BusinessMember, Customer, Item, Supplier, Purchase, Sale, Cost, ArcaVoucher, Employee, Schedule };

@@ -8,6 +8,7 @@ import { seedSuppliers } from './suppliers.js';
 import { seedPurchases } from './purchases.js';
 import { seedSales } from './sales.js';
 import { seedCosts } from './costs.js';
+import { seedEmployees } from './employees.js';
 
 export async function runSeeds() {
   console.log('=== Starting seed process ===');
@@ -32,6 +33,9 @@ export async function runSeeds() {
 
   await seedSuppliers();
   console.log('✓ Suppliers done');
+
+  await seedEmployees();
+  console.log('✓ Employees done');
 
   await seedPurchases();
   console.log('✓ Purchases done');

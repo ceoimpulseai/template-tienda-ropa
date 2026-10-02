@@ -29,6 +29,10 @@ export const PERMISSIONS = [
   'costs:delete',
   'financials:read',
   'metrics:read',
+  'employees:read',
+  'employees:create',
+  'employees:update',
+  'employees:delete',
 ] as const;
 
 export type Permission = (typeof PERMISSIONS)[number];
@@ -55,4 +59,5 @@ export const PERMISSION_GROUPS = {
   costs: ['costs:read', 'costs:create', 'costs:delete'],
   financials: ['financials:read'],
   metrics: ['metrics:read'],
+  employees: ['employees:read', 'employees:create', 'employees:update', 'employees:delete'],
 } as const;

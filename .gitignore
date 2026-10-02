@@ -11,3 +11,5 @@ coverage
 /.github
 *.csr
 *.key
+*.pem
+*.conf

@@ -21,6 +21,7 @@ import { SalesPage } from './modules/_example/sales/SalesPage';
 import { CostsPage } from './modules/_example/costs/CostsPage';
 import { MetricsPage } from './modules/_example/metrics/MetricsPage';
 import { FinancialsPage } from './modules/_example/financials/FinancialsPage';
+import { EmployeesPage } from './modules/employees/EmployeesPage';
 
 export function App() {
   return (
@@ -70,6 +71,9 @@ export function App() {
                 </Route>
                 <Route element={<RequirePermission permission="suppliers:read" />}>
                   <Route path="/suppliers" element={<SuppliersPage />} />
+                </Route>
+                <Route element={<RequirePermission permission="employees:read" />}>
+                  <Route path="/employees" element={<EmployeesPage />} />
                 </Route>
                 <Route element={<RequirePermission permission="team:read" />}>
                   <Route path="/team" element={<TeamSettings />} />

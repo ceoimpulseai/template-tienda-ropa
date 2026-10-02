@@ -30,6 +30,9 @@ export const ROLE_PERMISSIONS: Record<Exclude<Role, 'admin'>, Permission[]> = {
     'costs:create',
     'financials:read',
     'metrics:read',
+    'employees:read',
+    'employees:create',
+    'employees:update',
   ],
   operator: [
     'items:read',
@@ -46,6 +49,7 @@ export const ROLE_PERMISSIONS: Record<Exclude<Role, 'admin'>, Permission[]> = {
     'costs:read',
     'costs:create',
     'metrics:read',
+    'employees:read',
   ],
   viewer: [
     'items:read',
@@ -55,6 +59,7 @@ export const ROLE_PERMISSIONS: Record<Exclude<Role, 'admin'>, Permission[]> = {
     'sales:read',
     'costs:read',
     'metrics:read',
+    'employees:read',
   ],
 };
 
