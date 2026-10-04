@@ -3,6 +3,7 @@ import { Branch } from '../modules/branches/branch.model.js';
 import { BusinessMember } from '../modules/team/team.model.js';
 import { Customer } from '../modules/customers/customer.model.js';
 import { Item } from '../modules/items/item.model.js';
+import { Variant } from '../modules/items/variant.model.js';
 import { Supplier } from '../modules/suppliers/supplier.model.js';
 import { Purchase } from '../modules/_example/purchases/purchase.model.js';
 import { Sale } from '../modules/_example/sales/sale.model.js';
@@ -18,6 +19,11 @@ BusinessMember.belongsTo(Business, { foreignKey: 'businessId' });
 
 Business.hasMany(Item, { foreignKey: 'businessId' });
 Item.belongsTo(Business, { foreignKey: 'businessId' });
+
+Item.hasMany(Variant, { foreignKey: 'itemId', onDelete: 'CASCADE', as: 'variants' });
+Variant.belongsTo(Item, { foreignKey: 'itemId', as: 'item' });
+Business.hasMany(Variant, { foreignKey: 'businessId' });
+Variant.belongsTo(Business, { foreignKey: 'businessId' });
 
 Business.hasMany(Supplier, { foreignKey: 'businessId' });
 Supplier.belongsTo(Business, { foreignKey: 'businessId' });
@@ -53,4 +59,4 @@ Employee.belongsTo(Business, { foreignKey: 'businessId' });
 Employee.hasMany(Schedule, { foreignKey: 'employeeId', as: 'schedules' });
 Schedule.belongsTo(Employee, { foreignKey: 'employeeId', as: 'employee' });
 
-export { Business, Branch, BusinessMember, Customer, Item, Supplier, Purchase, Sale, Cost, ArcaVoucher, Employee, Schedule };
+export { Business, Branch, BusinessMember, Customer, Item, Variant, Supplier, Purchase, Sale, Cost, ArcaVoucher, Employee, Schedule };

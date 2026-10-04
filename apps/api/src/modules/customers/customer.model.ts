@@ -16,6 +16,10 @@ export class Customer extends Model<InferAttributes<Customer>, InferCreationAttr
   declare cuit: CreationOptional<string | null>;
   declare dni: CreationOptional<string | null>;
   declare vatCondition: CreationOptional<string | null>;
+  // Campos específicos de indumentaria
+  declare preferredSizes: CreationOptional<Record<string, string> | null>;
+  declare preferredCategories: CreationOptional<string[] | null>;
+  declare fitNotes: CreationOptional<string | null>;
 }
 
 Customer.init(
@@ -28,6 +32,10 @@ Customer.init(
     cuit: { type: DataTypes.STRING(11), allowNull: true, field: 'cuit' },
     dni: { type: DataTypes.STRING, allowNull: true, field: 'dni' },
     vatCondition: { type: DataTypes.STRING, allowNull: true, defaultValue: 'Consumidor Final', field: 'vatCondition' },
+    // Campos de indumentaria
+    preferredSizes: { type: DataTypes.JSONB, allowNull: true },
+    preferredCategories: { type: DataTypes.JSONB, allowNull: true },
+    fitNotes: { type: DataTypes.TEXT, allowNull: true },
   },
   { sequelize, modelName: 'customer', tableName: 'customers' },
 );

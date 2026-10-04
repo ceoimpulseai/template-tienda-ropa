@@ -1,5 +1,14 @@
 import 'dotenv/config';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const projectRoot = path.resolve(__dirname, '../../..');
+
+// Load .env from project root
+import { config as dotenvConfig } from 'dotenv';
+dotenvConfig({ path: path.resolve(projectRoot, '.env') });
 
 const DEV_ARCA_MASTER_KEY = '0000000000000000000000000000000000000000000000000000000000000000';
 
@@ -23,6 +32,9 @@ const envSchema = z.object({
   TEST_AUTH_HEADER_ENABLED: z.coerce.boolean().default(false),
   ARCA_MASTER_KEY: z.string().regex(/^[0-9a-fA-F]{64}$/).default(DEV_ARCA_MASTER_KEY),
   ARCA_TIMEOUT_MS: z.coerce.number().default(20_000),
+  CLOUDINARY_CLOUD_NAME: z.string().optional(),
+  CLOUDINARY_API_KEY: z.string().optional(),
+  CLOUDINARY_API_SECRET: z.string().optional(),
 }).superRefine((data, ctx) => {
   if (data.NODE_ENV === 'production' && data.BETTER_AUTH_SECRET === 'dev-secret-change-me') {
     ctx.addIssue({

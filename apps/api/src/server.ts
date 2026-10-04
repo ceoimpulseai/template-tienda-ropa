@@ -19,8 +19,12 @@ await sequelize.query(`
 `);
 
 if (env.NODE_ENV !== 'production') {
-  const { runSeeds } = await import('./seed/index.js');
-  await runSeeds();
+  try {
+    const { runSeeds } = await import('./seed/index.js');
+    await runSeeds();
+  } catch (err) {
+    console.warn('Seed process failed (likely first run - better-auth tables not created yet):', err instanceof Error ? err.message : err);
+  }
 }
 
 const app = express();

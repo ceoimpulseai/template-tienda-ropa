@@ -12,8 +12,13 @@ export const PERMISSIONS = [
   'items:create',
   'items:update',
   'items:delete',
+  'variants:read',
+  'variants:create',
+  'variants:update',
+  'variants:delete',
   'customers:read',
   'customers:create',
+  'customers:update',
   'customers:delete',
   'suppliers:read',
   'suppliers:create',
@@ -33,6 +38,8 @@ export const PERMISSIONS = [
   'employees:create',
   'employees:update',
   'employees:delete',
+  'upload:create',
+  'upload:delete',
 ] as const;
 
 export type Permission = (typeof PERMISSIONS)[number];
@@ -52,7 +59,8 @@ export const PERMISSION_GROUPS = {
   branches: ['branches:read', 'branches:create', 'branches:update', 'branches:delete'],
   team: ['team:read', 'team:invite', 'team:remove'],
   items: ['items:read', 'items:create', 'items:update', 'items:delete'],
-  customers: ['customers:read', 'customers:create', 'customers:delete'],
+  variants: ['variants:read', 'variants:create', 'variants:update', 'variants:delete'],
+  customers: ['customers:read', 'customers:create', 'customers:update', 'customers:delete'],
   suppliers: ['suppliers:read', 'suppliers:create', 'suppliers:update', 'suppliers:delete'],
   purchases: ['purchases:read', 'purchases:create'],
   sales: ['sales:read', 'sales:create'],
@@ -60,4 +68,5 @@ export const PERMISSION_GROUPS = {
   financials: ['financials:read'],
   metrics: ['metrics:read'],
   employees: ['employees:read', 'employees:create', 'employees:update', 'employees:delete'],
+  upload: ['upload:create', 'upload:delete'],
 } as const;

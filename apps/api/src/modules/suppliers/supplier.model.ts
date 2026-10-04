@@ -15,6 +15,10 @@ export class Supplier extends Model<InferAttributes<Supplier>, InferCreationAttr
   declare email: CreationOptional<string>;
   declare address: CreationOptional<string>;
   declare notes: CreationOptional<string>;
+  // Campos específicos de indumentaria
+  declare garmentTypes: CreationOptional<string[] | null>;
+  declare minOrderQuantity: CreationOptional<number | null>;
+  declare leadTimeDays: CreationOptional<number | null>;
 }
 
 Supplier.init(
@@ -26,6 +30,10 @@ Supplier.init(
     email: { type: DataTypes.STRING, allowNull: true },
     address: { type: DataTypes.STRING, allowNull: true },
     notes: { type: DataTypes.TEXT, allowNull: true },
+    // Campos de indumentaria
+    garmentTypes: { type: DataTypes.JSONB, allowNull: true },
+    minOrderQuantity: { type: DataTypes.INTEGER, allowNull: true },
+    leadTimeDays: { type: DataTypes.INTEGER, allowNull: true },
   },
   { sequelize, modelName: 'supplier', tableName: 'suppliers' },
 );

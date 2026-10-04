@@ -8,6 +8,10 @@ export const supplierSchema = z.object({
   email: z.string().optional().default(''),
   address: z.string().optional().default(''),
   notes: z.string().optional().default(''),
+  // Campos de indumentaria
+  garmentTypes: z.array(z.string()).optional().nullable(),
+  minOrderQuantity: z.number().int().nonnegative().optional().nullable(),
+  leadTimeDays: z.number().int().nonnegative().optional().nullable(),
 });
 export type Supplier = z.infer<typeof supplierSchema>;
 
@@ -17,6 +21,9 @@ export const createSupplierSchema = supplierSchema.pick({
   email: true,
   address: true,
   notes: true,
+  garmentTypes: true,
+  minOrderQuantity: true,
+  leadTimeDays: true,
 });
 export type CreateSupplierInput = z.infer<typeof createSupplierSchema>;
 

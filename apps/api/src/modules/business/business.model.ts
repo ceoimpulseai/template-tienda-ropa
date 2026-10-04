@@ -18,6 +18,15 @@ export class Business extends Model<InferAttributes<Business>, InferCreationAttr
   declare arcaEnvironment: CreationOptional<string>;
   declare arcaCertPem: CreationOptional<string | null>;
   declare arcaPrivateKeyPem: CreationOptional<string | null>;
+  // Branding / tienda pública
+  declare displayName: CreationOptional<string | null>;
+  declare description: CreationOptional<string | null>;
+  declare logoPublicId: CreationOptional<string | null>;
+  declare coverPublicId: CreationOptional<string | null>;
+  declare themeConfig: CreationOptional<Record<string, unknown> | null>;
+  declare shippingPolicy: CreationOptional<string | null>;
+  declare returnPolicy: CreationOptional<string | null>;
+  declare socialLinks: CreationOptional<Record<string, string> | null>;
 }
 
 Business.init(
@@ -32,6 +41,15 @@ Business.init(
     arcaEnvironment: { type: DataTypes.STRING, allowNull: false, defaultValue: 'homologation', field: 'arcaEnvironment' },
     arcaCertPem: { type: DataTypes.TEXT, allowNull: true, field: 'arcaCertPem' },
     arcaPrivateKeyPem: { type: DataTypes.TEXT, allowNull: true, field: 'arcaPrivateKeyPem' },
+    // Branding / tienda pública
+    displayName: { type: DataTypes.STRING(255), allowNull: true, field: 'displayName' },
+    description: { type: DataTypes.TEXT, allowNull: true },
+    logoPublicId: { type: DataTypes.STRING(255), allowNull: true, field: 'logoPublicId' },
+    coverPublicId: { type: DataTypes.STRING(255), allowNull: true, field: 'coverPublicId' },
+    themeConfig: { type: DataTypes.JSONB, allowNull: true, field: 'themeConfig' },
+    shippingPolicy: { type: DataTypes.TEXT, allowNull: true, field: 'shippingPolicy' },
+    returnPolicy: { type: DataTypes.TEXT, allowNull: true, field: 'returnPolicy' },
+    socialLinks: { type: DataTypes.JSONB, allowNull: true, field: 'socialLinks' },
   },
   { sequelize, modelName: 'business', tableName: 'businesses' },
 );

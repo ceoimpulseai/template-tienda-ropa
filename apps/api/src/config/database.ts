@@ -13,13 +13,6 @@ function createSequelize(): Sequelize {
     return new Sequelize({ dialect: 'sqlite', storage: ':memory:', logging: false });
   }
 
-  const hasPostgresConfig = Boolean(env.DATABASE_URL || (env.DB_HOST && env.DB_NAME && env.DB_USER));
-
-  if (!hasPostgresConfig) {
-    // ponytail: fallback a SQLite local para desarrollo sin depender de un Postgres corriendo.
-    return new Sequelize({ dialect: 'sqlite', storage: './dev.sqlite', logging: false });
-  }
-
   const commonOptions = {
     dialect: 'postgres',
     logging: false,
@@ -31,7 +24,11 @@ function createSequelize(): Sequelize {
     return new Sequelize(env.DATABASE_URL, commonOptions);
   }
 
-  return new Sequelize(env.DB_NAME!, env.DB_USER!, env.DB_PASSWORD, {
+  if (!env.DB_HOST || !env.DB_NAME || !env.DB_USER) {
+    throw new Error('Postgres configuration required. Set DATABASE_URL or DB_HOST/DB_NAME/DB_USER/DB_PASSWORD');
+  }
+
+  return new Sequelize(env.DB_NAME, env.DB_USER, env.DB_PASSWORD, {
     host: env.DB_HOST,
     port: env.DB_PORT ?? 5432,
     ...commonOptions,

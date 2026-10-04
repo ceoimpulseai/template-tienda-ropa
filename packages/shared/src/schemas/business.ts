@@ -12,10 +12,32 @@ export const businessSchema = z.object({
   arcaEnvironment: arcaEnvironmentEnum.default('homologation'),
   arcaCertPem: z.string().nullable().default(null),
   arcaPrivateKeyPem: z.string().nullable().default(null),
+  // Branding / tienda pública
+  displayName: z.string().max(255).optional().nullable(),
+  description: z.string().optional().nullable(),
+  logoPublicId: z.string().optional().nullable(),
+  coverPublicId: z.string().optional().nullable(),
+  themeConfig: z.record(z.unknown()).optional().nullable(),
+  shippingPolicy: z.string().optional().nullable(),
+  returnPolicy: z.string().optional().nullable(),
+  socialLinks: z.record(z.string()).optional().nullable(),
 });
 export type Business = z.infer<typeof businessSchema>;
 
 export const updateBusinessSchema = businessSchema
-  .pick({ name: true, currencySymbol: true, taxPercent: true, catalogWhatsapp: true })
+  .pick({
+    name: true,
+    currencySymbol: true,
+    taxPercent: true,
+    catalogWhatsapp: true,
+    displayName: true,
+    description: true,
+    logoPublicId: true,
+    coverPublicId: true,
+    themeConfig: true,
+    shippingPolicy: true,
+    returnPolicy: true,
+    socialLinks: true,
+  })
   .partial();
 export type UpdateBusinessInput = z.infer<typeof updateBusinessSchema>;

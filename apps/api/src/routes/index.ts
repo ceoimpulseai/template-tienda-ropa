@@ -4,7 +4,9 @@ import { branchRoutes } from '../modules/branches/branch.routes.js';
 import { teamRoutes } from '../modules/team/team.routes.js';
 import { customerRoutes } from '../modules/customers/customer.routes.js';
 import { itemRoutes } from '../modules/items/item.routes.js';
+import { variantRoutes } from '../modules/items/variant.routes.js';
 import { catalogRoutes } from '../modules/catalog/catalog.routes.js';
+import { uploadRoutes } from '../modules/upload/upload.routes.js';
 import { supplierRoutes } from '../modules/suppliers/supplier.routes.js';
 import { purchaseRoutes } from '../modules/_example/purchases/purchase.routes.js';
 import { saleRoutes } from '../modules/_example/sales/sale.routes.js';
@@ -21,9 +23,11 @@ routes.use('/branches', branchRoutes);
 routes.use('/team', teamRoutes);
 routes.use('/customers', customerRoutes);
 routes.use('/items', itemRoutes);
+routes.use('/items', variantRoutes);
 // Sin requireAuth/requireBusiness a propósito: catalogRoutes es el storefront
 // público. No copiar el middleware de auth de un módulo hermano acá.
 routes.use('/catalog', catalogRoutes);
+routes.use('/upload', uploadRoutes);
 routes.use('/suppliers', supplierRoutes);
 routes.use('/purchases', purchaseRoutes);
 routes.use('/sales', saleRoutes);

@@ -3,6 +3,8 @@ import { randomUUID } from 'node:crypto';
 import { sequelize } from '../../config/database.js';
 import { Business } from '../business/business.model.js';
 import { Item } from '../items/item.model.js';
+import { Variant } from '../items/variant.model.js';
+import '../../models/index.js';
 import { catalogService } from './catalog.service.js';
 
 beforeAll(async () => {
@@ -15,7 +17,7 @@ describe('catalogService.getById', () => {
     expect(result).toBeNull();
   });
 
-  it('returns only visible, in-stock items for the matching business', async () => {
+  it('returns only visible items with variants for the matching business', async () => {
     const business = await Business.create({
       id: randomUUID(),
       name: 'Tienda Test',
@@ -23,14 +25,29 @@ describe('catalogService.getById', () => {
     });
     const otherBusiness = await Business.create({ id: randomUUID(), name: 'Otro' });
 
-    const visible = await Item.create({
+    const item = await Item.create({
       id: randomUUID(),
       businessId: business.id,
-      name: 'Visible',
+      name: 'Remera Básica',
       price: 100,
       stock: 5,
       visibleInCatalog: true,
+      category: 'remera',
+      gender: 'unisex',
     });
+
+    const variant = await Variant.create({
+      id: randomUUID(),
+      businessId: business.id,
+      itemId: item.id,
+      size: 'M',
+      color: 'Rojo',
+      colorHex: '#FF0000',
+      sku: 'REM-ROJO-M',
+      price: 120,
+      stock: 10,
+    });
+
     await Item.create({
       id: randomUUID(),
       businessId: business.id,
@@ -38,14 +55,6 @@ describe('catalogService.getById', () => {
       price: 50,
       stock: 5,
       visibleInCatalog: false,
-    });
-    await Item.create({
-      id: randomUUID(),
-      businessId: business.id,
-      name: 'Sin stock',
-      price: 30,
-      stock: 0,
-      visibleInCatalog: true,
     });
     await Item.create({
       id: randomUUID(),
@@ -59,7 +68,43 @@ describe('catalogService.getById', () => {
     const result = await catalogService.getById(business.id);
 
     expect(result).not.toBeNull();
-    expect(result!.business).toEqual({ name: 'Tienda Test', whatsapp: '+54 9 11 1234-5678' });
-    expect(result!.items).toEqual([{ id: visible.id, name: 'Visible', price: 100 }]);
+    expect(result!.business).toEqual({
+      id: business.id,
+      name: 'Tienda Test',
+      displayName: null,
+      description: null,
+      logoUrl: null,
+      coverUrl: null,
+      whatsapp: '+54 9 11 1234-5678',
+      currencySymbol: '$',
+      shippingPolicy: null,
+      returnPolicy: null,
+      socialLinks: null,
+    });
+    expect(result!.items).toHaveLength(1);
+    expect(result!.items[0]).toMatchObject({
+      id: item.id,
+      name: 'Remera Básica',
+      price: 100,
+      category: 'remera',
+      gender: 'unisex',
+      brand: null,
+      description: null,
+      material: null,
+      careInstructions: null,
+      variants: [
+        {
+          id: variant.id,
+          size: 'M',
+          color: 'Rojo',
+          colorHex: '#FF0000',
+          sku: 'REM-ROJO-M',
+          price: 120,
+          stock: 10,
+          imageUrl: null,
+          thumbnailUrl: null,
+        },
+      ],
+    });
   });
 });
