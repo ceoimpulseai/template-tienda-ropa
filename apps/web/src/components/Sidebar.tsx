@@ -29,7 +29,7 @@ function getNavIcon(entry: NavEntry) {
   switch (entry.to) {
     case '/':
       return <BarChartIcon className="h-5 w-5 shrink-0" />;
-    case '/items':
+    case '/catalog':
       return <PackageIcon className="h-5 w-5 shrink-0" />;
     case '/purchases':
       return <ShoppingCartIcon className="h-5 w-5 shrink-0" />;

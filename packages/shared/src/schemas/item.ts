@@ -17,6 +17,7 @@ export const itemSchema = z.object({
   careInstructions: z.string().optional().nullable(),
   brand: z.string().optional().nullable(),
   description: z.string().optional().nullable(),
+  sizes: z.array(z.string()).optional().nullable(),
 });
 export type Item = z.infer<typeof itemSchema>;
 
@@ -31,6 +32,7 @@ export const createItemSchema = itemSchema
     careInstructions: z.string().optional(),
     brand: z.string().optional(),
     description: z.string().optional(),
+    sizes: z.array(z.string()).optional(),
   });
 export type CreateItemInput = z.infer<typeof createItemSchema>;
 
@@ -47,6 +49,7 @@ export const updateItemSchema = itemSchema
     careInstructions: true,
     brand: true,
     description: true,
+    sizes: true,
   })
   .partial();
 export type UpdateItemInput = z.infer<typeof updateItemSchema>;

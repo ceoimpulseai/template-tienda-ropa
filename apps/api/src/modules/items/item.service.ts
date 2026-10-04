@@ -1,9 +1,13 @@
 import { itemRepository } from './item.repository.js';
+import { Variant } from './variant.model.js';
 import type { CreateItemInput, UpdateItemInput } from '@template/shared';
 
 export const itemService = {
   async list(businessId: string) {
-    return itemRepository.findAll(businessId, { order: [['name', 'ASC']] });
+    return itemRepository.findAll(businessId, {
+      order: [['name', 'ASC']],
+      include: [{ model: Variant, as: 'variants', required: false }],
+    });
   },
 
   async create(businessId: string, input: CreateItemInput) {

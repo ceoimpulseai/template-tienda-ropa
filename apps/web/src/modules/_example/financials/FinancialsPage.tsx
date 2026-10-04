@@ -10,7 +10,7 @@ import { RatiosTab } from './RatiosTab';
 const TABS = [
   { key: 'income-statement', label: 'Estado de Resultados' },
   { key: 'break-even', label: 'Punto de Equilibrio' },
-  { key: 'product-margins', label: 'Márgenes por Producto' },
+  { key: 'product-margins', label: 'Márgenes por Prenda' },
   { key: 'ratios', label: 'Ratios Financieros' },
 ];
 

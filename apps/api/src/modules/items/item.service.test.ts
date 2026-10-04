@@ -2,6 +2,7 @@ import { describe, expect, it, beforeAll } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import { sequelize } from '../../config/database.js';
 import { Business } from '../business/business.model.js';
+import '../../models/index.js'; // Load associations
 import { itemService } from './item.service.js';
 
 beforeAll(async () => {

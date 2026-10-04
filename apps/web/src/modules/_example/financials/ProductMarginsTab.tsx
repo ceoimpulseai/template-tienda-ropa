@@ -15,7 +15,7 @@ export function ProductMarginsTab() {
   }
 
   const columns = [
-    { header: 'Producto', render: (row: ProductMargin) => row.itemName },
+    { header: 'Prenda', render: (row: ProductMargin) => row.itemName },
     {
       header: 'Precio',
       render: (row: ProductMargin) => formatCurrency(row.unitPrice),

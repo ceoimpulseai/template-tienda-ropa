@@ -187,7 +187,7 @@ export function SalesPage() {
         ) : (
           <Table<Sale>
             columns={[
-              { header: 'Producto', render: (s) => s.itemId },
+              { header: 'Prenda', render: (s) => s.itemId },
               { header: 'Cantidad', render: (s) => s.quantity },
               { header: 'Precio unitario', render: (s) => s.unitPrice },
               {

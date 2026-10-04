@@ -37,8 +37,8 @@ export interface BusinessConfig {
 }
 
 const terminology = {
-  item: 'Producto',
-  itemPlural: 'Productos',
+  item: 'Prenda',
+  itemPlural: 'Prendas',
   branch: 'Sucursal',
   branchPlural: 'Sucursales',
 };
@@ -54,7 +54,7 @@ const enabledModules = {
 
 const nav: NavEntry[] = [
   { to: '/', label: 'Métricas', moduleKey: 'metrics', permission: 'metrics:read' },
-  { to: '/items', label: terminology.itemPlural, permission: 'items:read' },
+  { to: '/catalog', label: terminology.itemPlural, permission: 'items:read' },
   { to: '/purchases', label: 'Compras', moduleKey: 'purchases', permission: 'purchases:read' },
   { to: '/sales', label: 'Ventas', moduleKey: 'sales', permission: 'sales:read' },
   { to: '/costs', label: 'Gastos', moduleKey: 'costs', permission: 'costs:read' },

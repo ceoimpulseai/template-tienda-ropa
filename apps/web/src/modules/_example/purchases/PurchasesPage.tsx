@@ -61,7 +61,7 @@ export function PurchasesPage() {
       ) : (
         <Table<Purchase>
           columns={[
-            { header: 'Producto', render: (p) => p.itemId },
+            { header: 'Prenda', render: (p) => p.itemId },
             { header: 'Cantidad', render: (p) => p.quantity },
             { header: 'Costo unitario', render: (p) => p.unitCost },
             { header: 'Proveedor', render: (p) => supplierName(p.supplierId) },

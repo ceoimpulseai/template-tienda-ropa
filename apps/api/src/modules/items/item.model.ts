@@ -25,6 +25,7 @@ export class Item extends Model<InferAttributes<Item>, InferCreationAttributes<I
   declare careInstructions: CreationOptional<string | null>;
   declare brand: CreationOptional<string | null>;
   declare description: CreationOptional<string | null>;
+  declare sizes: CreationOptional<string[] | null>;
 }
 
 Item.init(
@@ -43,6 +44,11 @@ Item.init(
     careInstructions: { type: DataTypes.TEXT, allowNull: true },
     brand: { type: DataTypes.STRING(255), allowNull: true },
     description: { type: DataTypes.TEXT, allowNull: true },
+    sizes: { type: DataTypes.JSONB, allowNull: true },
   },
-  { sequelize, modelName: 'item', tableName: 'items' },
+  {
+    sequelize,
+    modelName: 'item',
+    tableName: 'items',
+  },
 );

@@ -67,7 +67,7 @@ export function App() {
                   <Route path="/customers" element={<CustomersPage />} />
                 </Route>
                 <Route element={<RequirePermission permission="items:read" />}>
-                  <Route path="/items" element={<ItemsPage />} />
+                  <Route path="/catalog" element={<ItemsPage />} />
                 </Route>
                 <Route element={<RequirePermission permission="suppliers:read" />}>
                   <Route path="/suppliers" element={<SuppliersPage />} />
