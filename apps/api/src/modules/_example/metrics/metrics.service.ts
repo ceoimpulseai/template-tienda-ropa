@@ -27,8 +27,10 @@ export const metricsService = {
     );
 
     const [purchasesRow] = await sequelize.query<{ totalCost: string | null }>(
-      `SELECT SUM(quantity * "unitCost") AS "totalCost"
-       FROM purchases WHERE "businessId" = :businessId`,
+      `SELECT SUM(li.quantity * li."unitCost") AS "totalCost"
+       FROM purchase_line_items li
+       JOIN purchase_orders po ON po.id = li."purchaseOrderId"
+       WHERE li."businessId" = :businessId AND po.status = 'completed'`,
       { replacements: { businessId }, type: QueryTypes.SELECT },
     );
 

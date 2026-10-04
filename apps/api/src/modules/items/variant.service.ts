@@ -1,5 +1,6 @@
 import { variantRepository } from './variant.repository.js';
 import type { CreateVariantInput, UpdateVariantInput } from '@template/shared';
+import type { Transaction } from 'sequelize';
 
 export const variantService = {
   async list(businessId: string, itemId: string) {
@@ -23,5 +24,9 @@ export const variantService = {
 
   async remove(businessId: string, variantId: string) {
     await variantRepository.remove(businessId, variantId);
+  },
+
+  async decrementStock(variantId: string, quantity: number, transaction?: Transaction) {
+    return variantRepository.decrementStock(variantId, quantity, transaction);
   },
 };

@@ -12,8 +12,10 @@ export const financialsService = {
     );
 
     const [purchasesRow] = await sequelize.query<{ cogs: string | null }>(
-      `SELECT SUM(quantity * "unitCost") AS cogs
-       FROM purchases WHERE "businessId" = :businessId`,
+      `SELECT SUM(li.quantity * li."unitCost") AS cogs
+       FROM purchase_line_items li
+       JOIN purchase_orders po ON po.id = li."purchaseOrderId"
+       WHERE li."businessId" = :businessId AND po.status = 'completed'`,
       { replacements: { businessId }, type: QueryTypes.SELECT },
     );
 
@@ -89,8 +91,10 @@ export const financialsService = {
     );
 
     const [avgCostRow] = await sequelize.query<{ avgUnitCost: string | null }>(
-      `SELECT AVG("unitCost") AS "avgUnitCost"
-       FROM purchases WHERE "businessId" = :businessId`,
+      `SELECT AVG(li."unitCost") AS "avgUnitCost"
+       FROM purchase_line_items li
+       JOIN purchase_orders po ON po.id = li."purchaseOrderId"
+       WHERE li."businessId" = :businessId AND po.status = 'completed'`,
       { replacements: { businessId }, type: QueryTypes.SELECT },
     );
 
@@ -122,7 +126,7 @@ export const financialsService = {
       totalQty: string | null;
     }>(
       `SELECT i.id, i.name, i.price,
-        COALESCE((SELECT AVG(p."unitCost") FROM purchases p WHERE p."itemId" = i.id AND p."businessId" = i."businessId"), null) AS "avgUnitCost",
+        COALESCE((SELECT AVG(li."unitCost") FROM purchase_line_items li JOIN purchase_orders po ON po.id = li."purchaseOrderId" WHERE li."itemId" = i.id AND li."businessId" = i."businessId" AND po.status = 'completed'), null) AS "avgUnitCost",
         COALESCE((SELECT SUM(s."amountReceived") FROM sales s WHERE s."itemId" = i.id AND s."businessId" = i."businessId" AND s."isInternal" = false), 0) AS "totalRevenue",
         COALESCE((SELECT SUM(s.quantity) FROM sales s WHERE s."itemId" = i.id AND s."businessId" = i."businessId" AND s."isInternal" = false), 0) AS "totalQty"
        FROM items i WHERE i."businessId" = :businessId`,
@@ -156,8 +160,10 @@ export const financialsService = {
     );
 
     const [purchasesRow] = await sequelize.query<{ cogs: string | null }>(
-      `SELECT SUM(quantity * "unitCost") AS cogs
-       FROM purchases WHERE "businessId" = :businessId`,
+      `SELECT SUM(li.quantity * li."unitCost") AS cogs
+       FROM purchase_line_items li
+       JOIN purchase_orders po ON po.id = li."purchaseOrderId"
+       WHERE li."businessId" = :businessId AND po.status = 'completed'`,
       { replacements: { businessId }, type: QueryTypes.SELECT },
     );
 

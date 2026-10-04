@@ -6,6 +6,9 @@ import { Item } from '../modules/items/item.model.js';
 import { Variant } from '../modules/items/variant.model.js';
 import { Supplier } from '../modules/suppliers/supplier.model.js';
 import { Purchase } from '../modules/_example/purchases/purchase.model.js';
+import { PurchaseOrder } from '../modules/_example/purchases/purchase-order.model.js';
+import { PurchaseLineItem } from '../modules/_example/purchases/purchase-line-item.model.js';
+import { PurchaseItemVariantDist } from '../modules/_example/purchases/purchase-item-variant-dist.model.js';
 import { Sale } from '../modules/_example/sales/sale.model.js';
 import { Cost } from '../modules/_example/costs/cost.model.js';
 import { ArcaVoucher } from '../modules/arca/arca-voucher.model.js';
@@ -34,6 +37,26 @@ Branch.hasMany(Purchase, { foreignKey: 'branchId' });
 Supplier.hasMany(Purchase, { foreignKey: 'supplierId' });
 Purchase.belongsTo(Supplier, { foreignKey: 'supplierId' });
 
+// New PurchaseOrder associations
+Business.hasMany(PurchaseOrder, { foreignKey: 'businessId' });
+Branch.hasMany(PurchaseOrder, { foreignKey: 'branchId' });
+Supplier.hasMany(PurchaseOrder, { foreignKey: 'supplierId' });
+PurchaseOrder.belongsTo(Supplier, { foreignKey: 'supplierId' });
+PurchaseOrder.belongsTo(Branch, { foreignKey: 'branchId' });
+
+PurchaseOrder.hasMany(PurchaseLineItem, { foreignKey: 'purchaseOrderId', onDelete: 'CASCADE', as: 'lines' });
+PurchaseLineItem.belongsTo(PurchaseOrder, { foreignKey: 'purchaseOrderId' });
+
+Business.hasMany(PurchaseLineItem, { foreignKey: 'businessId' });
+Item.hasMany(PurchaseLineItem, { foreignKey: 'itemId' });
+PurchaseLineItem.belongsTo(Item, { foreignKey: 'itemId', as: 'item' });
+
+PurchaseLineItem.hasMany(PurchaseItemVariantDist, { foreignKey: 'purchaseLineItemId', onDelete: 'CASCADE', as: 'variantDists' });
+PurchaseItemVariantDist.belongsTo(PurchaseLineItem, { foreignKey: 'purchaseLineItemId' });
+
+PurchaseItemVariantDist.belongsTo(Variant, { foreignKey: 'variantId', as: 'variant' });
+Variant.hasMany(PurchaseItemVariantDist, { foreignKey: 'variantId' });
+
 Business.hasMany(Customer, { foreignKey: 'businessId' });
 Customer.belongsTo(Business, { foreignKey: 'businessId' });
 
@@ -59,4 +82,4 @@ Employee.belongsTo(Business, { foreignKey: 'businessId' });
 Employee.hasMany(Schedule, { foreignKey: 'employeeId', as: 'schedules' });
 Schedule.belongsTo(Employee, { foreignKey: 'employeeId', as: 'employee' });
 
-export { Business, Branch, BusinessMember, Customer, Item, Variant, Supplier, Purchase, Sale, Cost, ArcaVoucher, Employee, Schedule };
+export { Business, Branch, BusinessMember, Customer, Item, Variant, Supplier, Purchase, PurchaseOrder, PurchaseLineItem, PurchaseItemVariantDist, Sale, Cost, ArcaVoucher, Employee, Schedule };
